@@ -20,7 +20,8 @@ void    token_free(Token *token);
 
 Ast *  ast_new(Token *token);
 
-void   ast_to_string_tree(Ast *ast);
+void   ast_print_node(Ast *ast);
+void   ast_print_tree(Ast *ast);
 
 void   ast_free(Ast *ast);
 

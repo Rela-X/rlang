@@ -50,12 +50,12 @@ Befehle zur Ausgabe von Werten in verschiedenen Darstellungsformaten
 #include "ast.h"
 
 #define YYERROR_VERBOSE 1
-#define YYDEBUG 0
+#define YYDEBUG 1
 
 extern int yylex();
 
 void
-yyerror(char *yymsg) {
+yyerror(const char *yymsg) {
 	printf("my_yyerror: %s\n", yymsg);
 }
 
@@ -67,15 +67,15 @@ Ast *ast;
 
 %union {
         Ast *node;
-        int token;
-        Token *value;
+        Token *token;
 }
 
 %destructor { } <*>
-%destructor { token_free($$); } <value>
 %destructor { ast_free($$); } <node>
+%destructor { token_free($$); } <token>
 
-%type  <node>  program expr
+%type  <node>  program statements statement expr assign_expr
+%type  <token> boolean_op arithmetic_comp arithmetic_op
 
 %token <token> ASSIGN
 %token <token> IF ELSE
@@ -88,7 +88,7 @@ Ast *ast;
 %token <token> LT LE GE GT              // arithmetic comparators
 %token <token> ADD SUB MUL DIV POW MOD  // arithmetic operators
 
-%token <value> BOOLEAN INTEGER FLOAT STRING IDENTIFIER
+%token <token> BOOLEAN INTEGER FLOAT STRING IDENTIFIER
 
 %right NOT
 %nonassoc EQ NEQ
@@ -115,15 +115,15 @@ statements      : statement statements
                 ;
 
 statement       : LBRACE statements RBRACE
-                | declarestmt
+                | declarestmt SEMICOLON
                 | ifstmt 
                 | whilestmt 
                 | expr SEMICOLON
                 ;
 
 declarestmt     : IDENTIFIER IDENTIFIER ASSIGN expr
+                | IDENTIFIER IDENTIFIER
                 ;
-
 
 ifstmt          : IF expr statement ELSE statement
                 | IF expr statement
@@ -136,14 +136,14 @@ whilestmt       : WHILE expr statement
 expr            : LPAREN expr RPAREN            { $$ = $2; }
                 | assign_expr
                 | call_expr
-                | expr boolean_op expr          
-                | expr arithmetic_comp expr     
+                | expr boolean_op expr          { $$ = ast_new($2); /* add children */ }
+                | expr arithmetic_comp expr     { $$ = ast_new($2); /* add children */ }
                 | expr arithmetic_op expr       { $$ = ast_new($2); /* add children */ }
-                | IDENTIFIER                    { $$ = ast_new($1); printf("%s\n", $1->value); }
-                | BOOLEAN                       { $$ = ast_new($1); printf("%s\n", $1->value); }
-                | INTEGER                       { $$ = ast_new($1); printf("%s\n", $1->value); }
-                | FLOAT                         { $$ = ast_new($1); printf("%s\n", $1->value); }
-                | STRING                        { $$ = ast_new($1); printf("%s\n", $1->value); }
+                | IDENTIFIER                    { $$ = ast_new($1); if(0) printf("id %s\n", $1->value); }
+                | BOOLEAN                       { $$ = ast_new($1); if(0) printf("bool %s\n", $1->value); }
+                | INTEGER                       { $$ = ast_new($1); if(0) printf("int %s\n", $1->value); }
+                | FLOAT                         { $$ = ast_new($1); if(0) printf("flt %s\n", $1->value); }
+                | STRING                        { $$ = ast_new($1); if(0) printf("str %s\n", $1->value); }
 /*
                 | INC IDENTIFIER
                 | DEC IDENTIFIER
@@ -152,7 +152,7 @@ expr            : LPAREN expr RPAREN            { $$ = $2; }
 */
                 ;
 
-assign_expr     : IDENTIFIER ASSIGN expr
+assign_expr     : IDENTIFIER ASSIGN expr        { $$ = ast_new($2); }
                 ;
 
 call_expr       : IDENTIFIER LPAREN call_args RPAREN

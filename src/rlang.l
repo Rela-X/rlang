@@ -6,45 +6,45 @@
 #include "ast.h"
 #include "rlang.tab.h"
 
-#define TOKEN(t) return (yylval.token = t)
-#define VALUE(v) yylval.value = token_new(v, yytext); return v
+#define TOKEN(t) printf("%s\n", yytext); yylval.token = token_new(t, yytext); return t
 
 // http://flex.sourceforge.net/manual/Common-Patterns.html#Common-Patterns
 %}
 
-c99_decimal	([[:digit:]]{-}[0])[[:digit:]]*
+c99_decimal	0|(([[:digit:]]{-}[0])[[:digit:]]*)
 c99_hex		0[xX][[:xdigit:]]+
 c99_octal	0[oO][01234567]+
+c99_integer	({c99_decimal}|{c99_hex}|{c99_octal})
 
-dseq      ([[:digit:]]+)
-dseq_opt  ([[:digit:]]*)
-frac      (({dseq_opt}"."{dseq})|{dseq}".")
-exp       ([eE][+-]?{dseq})
-exp_opt   ({exp}?)
-fsuff     [flFL]
-fsuff_opt ({fsuff}?)
-hpref     (0[xX])
-hdseq     ([[:xdigit:]]+)
-hdseq_opt ([[:xdigit:]]*)
-hfrac     (({hdseq_opt}"."{hdseq})|({hdseq}"."))
-bexp      ([pP][+-]?{dseq})
-dfc       (({frac}{exp_opt}{fsuff_opt})|({dseq}{exp}{fsuff_opt}))
-hfc       (({hpref}{hfrac}{bexp}{fsuff_opt})|({hpref}{hdseq}{bexp}{fsuff_opt}))
+dseq		([[:digit:]]+)
+dseq_opt	([[:digit:]]*)
+frac		(({dseq_opt}"."{dseq})|{dseq}".")
+exp		([eE][+-]?{dseq})
+exp_opt		({exp}?)
+fsuff		[flFL]
+fsuff_opt	({fsuff}?)
+hpref		(0[xX])
+hdseq		([[:xdigit:]]+)
+hdseq_opt	([[:xdigit:]]*)
+hfrac		(({hdseq_opt}"."{hdseq})|({hdseq}"."))
+bexp		([pP][+-]?{dseq})
+dfc		(({frac}{exp_opt}{fsuff_opt})|({dseq}{exp}{fsuff_opt}))
+hfc		(({hpref}{hfrac}{bexp}{fsuff_opt})|({hpref}{hdseq}{bexp}{fsuff_opt}))
 c99_floating_point	({dfc}|{hfc})
 
 ucn  		((\\u([[:xdigit:]]{4}))|(\\U([[:xdigit:]]{8})))
-nondigit    	[_[:alpha:]]
-c99_id     	([_[:alpha:]]|{ucn})([_[:alnum:]]|{ucn})*
+nondigit	[_[:alpha:]]
+c99_id		([_[:alpha:]]|{ucn})([_[:alnum:]]|{ucn})*
 
 %%
 
 [ \t\r\n]+	{ }
 
-":="            { TOKEN(ASSIGN); }
-"if"            { TOKEN(IF); }
-"else"          { TOKEN(ELSE); }
-"while"         { TOKEN(WHILE); }
-"do"            { TOKEN(DO); }
+":="		{ TOKEN(ASSIGN); }
+"if"		{ TOKEN(IF); }
+"else"		{ TOKEN(ELSE); }
+"while"		{ TOKEN(WHILE); }
+"do"		{ TOKEN(DO); }
 
 "!"		{ TOKEN(NOT); }
 "=="		{ TOKEN(EQ); }
@@ -76,12 +76,12 @@ c99_id     	([_[:alpha:]]|{ucn})([_[:alnum:]]|{ucn})*
 
 ";"		{ TOKEN(SEMICOLON); }
 
-"true"|"false"		{ VALUE(BOOLEAN); }
-{c99_decimal}		{ VALUE(INTEGER); }
-{c99_floating_point}	{ VALUE(FLOAT); }
-{c99_id}		{ VALUE(IDENTIFIER); }
+"true"|"false"		{ TOKEN(BOOLEAN); }
+{c99_integer}		{ TOKEN(INTEGER); }
+{c99_floating_point}	{ TOKEN(FLOAT); }
+{c99_id}		{ TOKEN(IDENTIFIER); }
 
-.		{ }
+.		{ printf("UNHANDLED TOKEN \"%s\"\n", yytext); }
 
 %%
 
