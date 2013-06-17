@@ -1,7 +1,27 @@
-struct ast_node {
-	char *token; // ?
-	/** null-terminated array of child nodes */
-	struct ast_node **children;
+#ifndef AST_H_
+#define AST_H_
+
+typedef struct _token Token;
+struct _token {
+	// enum yytokentype type;
+	int type;
+	char *value;
 };
 
-extern void ast_to_string_tree(struct ast* ast);
+typedef struct _ast Ast;
+struct _ast {
+	Token *token;
+	/** null-terminated array of child nodes */
+	Ast**children;
+};
+
+Token * token_new(int type, char *value);
+void    token_free(Token *token);
+
+Ast *  ast_new(Token *token);
+
+void   ast_to_string_tree(Ast *ast);
+
+void   ast_free(Ast *ast);
+
+#endif

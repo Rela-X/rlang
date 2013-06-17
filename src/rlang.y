@@ -47,7 +47,7 @@ Befehle zur Ausgabe von Werten in verschiedenen Darstellungsformaten
 %{
 #include <stdio.h>
 
-#include "rlang.h"
+#include "ast.h"
 
 #define YYERROR_VERBOSE 1
 #define YYDEBUG 0
@@ -59,46 +59,36 @@ yyerror(char *yymsg) {
 	printf("my_yyerror: %s\n", yymsg);
 }
 
+Ast *ast;
+
 %}
 
 %locations
 
 %union {
-        bool    bval;
-        int     ival;
-        double  fval;
-        char    *str;
-        /*
-        rf_Domain *domain;
-        rf_Relation *relation;
-        */
+        Ast *node;
+        int token;
+        Token *value;
 }
 
 %destructor { } <*>
-%destructor { free($$); } <str>
-/*
-%destructor { rf_set_free($$); } <domain>
-%destructor { rf_relation_free($$); } <relation>
-*/
-%destructor { } <>
+%destructor { token_free($$); } <value>
+%destructor { ast_free($$); } <node>
 
-%token <bval>   BOOLEAN
-%token <ival>   INTEGER
-%token <fval>   FLOAT
-%token <str>    IDENTIFIER
+%type  <node>  program expr
 
-%token ASSIGN
-%token IF
-%token ELSE
-%token WHILE
-%token DO
+%token <token> ASSIGN
+%token <token> IF ELSE
+%token <token> WHILE DO
 
-%token LBRACE
-%token RBRACE
-%token LPAREN
-%token RPAREN
+%token <token> LBRACE RBRACE LPAREN RPAREN
+%token <token> SEMICOLON
 
-%token SEMICOLON
+%token <token> NOT EQ AND IOR XOR       // boolean comparators
+%token <token> LT LE GE GT              // arithmetic comparators
+%token <token> ADD SUB MUL DIV POW MOD  // arithmetic operators
+
+%token <value> BOOLEAN INTEGER FLOAT STRING IDENTIFIER
 
 %right NOT
 %nonassoc EQ NEQ
@@ -113,88 +103,71 @@ yyerror(char *yymsg) {
 %right POW
 %left INC DEC
 
-%type <bval>    boolexpr
-%type <ival>    arithmexpr
-
 %start program
 
 %%
 
-program         : statements
+program         : statements                    /* { $$ = ast = ast_new($1); } */
                 ;
 
 statements      : statement statements
                 | statement
                 ;
 
-statement       : assignstmt SEMICOLON
-                | callstmt SEMICOLON
+statement       : LBRACE statements RBRACE
+                | declarestmt
                 | ifstmt 
                 | whilestmt 
-                | stmtblock
                 | expr SEMICOLON
                 ;
 
-assignstmt      : IDENTIFIER IDENTIFIER ASSIGN expr
-                | IDENTIFIER ASSIGN expr
+declarestmt     : IDENTIFIER IDENTIFIER ASSIGN expr
                 ;
 
-callstmt        : IDENTIFIER LPAREN params RPAREN
+
+ifstmt          : IF expr statement ELSE statement
+                | IF expr statement
                 ;
 
-ifstmt          : IF boolexpr statement ELSE statement
-                | IF boolexpr statement
+whilestmt       : WHILE expr statement
+                | DO statement WHILE expr
                 ;
 
-whilestmt       : WHILE boolexpr statement
-                | DO statement WHILE boolexpr
-                ;
-
-stmtblock       : LBRACE statements RBRACE
-                ;
-
-expr            : boolexpr 
-                | arithmexpr
-                ;
-
-boolexpr	: LPAREN boolexpr RPAREN        { $$ = $2; }
-                | NOT boolexpr                  { $$ = reduce_not($2,&@2); }
-                | boolexpr EQ boolexpr          { $$ = reduce_eq($1,$3,&@3); }
-/*                | boolexpr NEQ boolexpr         { $$ = reduce_($1,$3); } */
-                | boolexpr AND boolexpr         { $$ = reduce_and($1,$3,&@3); }
-                | boolexpr IOR boolexpr         { $$ = reduce_ior($1,$3,&@3); }
-                | boolexpr XOR boolexpr         { $$ = reduce_xor($1,$3,&@3); } // TODO
-                | arithmexpr EQ arithmexpr      { $$ = reduce_eq2($1,$3,&@3); }
-/*                | arithmexpr NEQ arithmexpr     { $$ = reduce_($1,$3,&@3); } */
-                | arithmexpr LT arithmexpr      { $$ = reduce_lt($1,$3,&@3); }
-                | arithmexpr LE arithmexpr      { $$ = reduce_le($1,$3,&@3); }
-                | arithmexpr GE arithmexpr      { $$ = reduce_ge($1,$3,&@3); }
-                | arithmexpr GT arithmexpr      { $$ = reduce_gt($1,$3,&@3); }
-                | IDENTIFIER
-                | BOOLEAN                       { $$ = $1; }
-                ;
-
-arithmexpr	: LPAREN arithmexpr RPAREN      { $$ = $2; }
-/*                | NEG arithmexpr                { $$ = reduce_neg($2); } */
-                | arithmexpr ADD arithmexpr     { $$ = reduce_add($1,$3,&@3); }
-                | arithmexpr SUB arithmexpr     { $$ = reduce_sub($1,$3,&@3); }
-                | arithmexpr MUL arithmexpr     { $$ = reduce_mul($1,$3,&@3); }
-                | arithmexpr DIV arithmexpr     { $$ = reduce_div($1,$3,&@3); }
-                | arithmexpr POW arithmexpr     { $$ = reduce_pow($1,$3,&@3); }
-                | arithmexpr MOD arithmexpr     { $$ = reduce_mod($1,$3,&@3); }
+expr            : LPAREN expr RPAREN            { $$ = $2; }
+                | assign_expr
+                | call_expr
+                | expr boolean_op expr          
+                | expr arithmetic_comp expr     
+                | expr arithmetic_op expr       { $$ = ast_new($2); /* add children */ }
+                | IDENTIFIER                    { $$ = ast_new($1); printf("%s\n", $1->value); }
+                | BOOLEAN                       { $$ = ast_new($1); printf("%s\n", $1->value); }
+                | INTEGER                       { $$ = ast_new($1); printf("%s\n", $1->value); }
+                | FLOAT                         { $$ = ast_new($1); printf("%s\n", $1->value); }
+                | STRING                        { $$ = ast_new($1); printf("%s\n", $1->value); }
+/*
                 | INC IDENTIFIER
                 | DEC IDENTIFIER
                 | IDENTIFIER INC
                 | IDENTIFIER DEC
-                | IDENTIFIER
-                | INTEGER                       { $$ = $1; }
-                | FLOAT                         { $$ = $1; }
+*/
                 ;
 
-relexpr         :
+assign_expr     : IDENTIFIER ASSIGN expr
                 ;
 
-params          :
+call_expr       : IDENTIFIER LPAREN call_args RPAREN
+                ;
+
+call_args       : /* empty */
+                | expr "," call_args
+                | expr
+                ;
+
+boolean_op      : NOT | EQ | AND | IOR | XOR
+                ;
+arithmetic_comp : LT | LE | GE | GT
+                ;
+arithmetic_op   : ADD | SUB | MUL | DIV | POW | MOD
                 ;
 
 /* -- */

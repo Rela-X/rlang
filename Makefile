@@ -8,7 +8,7 @@ vpath %.y src/
 INC     += -I ./
 INC     += -I inc/
 
-OBJ = main.o rlang.o rlang.yy.o rlang.tab.o
+OBJ = main.o ast.o rlang.yy.o rlang.tab.o
 
 .PHONY : all clean
 .PHONY : test
