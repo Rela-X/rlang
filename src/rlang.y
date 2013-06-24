@@ -74,7 +74,7 @@ Ast *ast;
 %destructor { ast_free($$); } <node>
 %destructor { token_free($$); } <token>
 
-%type  <node>  program statements statement expr assign_expr
+%type  <node>  program statements statement declarestmt ifstmt whilestmt expr assign_expr
 %type  <token> boolean_op arithmetic_comp arithmetic_op
 
 %token <token> ASSIGN
@@ -101,49 +101,51 @@ Ast *ast;
 %left ADD SUB
 %left MUL DIV
 %right POW
+%right NEG
 %left INC DEC
 
 %start program
 
 %%
 
-program         : statements                    /* { $$ = ast = ast_new($1); } */
+program         : statements                    { ast = $$ = ast_new(NULL); ast_append_child($$, $1); }
                 ;
 
-statements      : statement statements
+statements      : statement statements          { ast_append_child($1, $2); }
                 | statement
                 ;
 
-statement       : LBRACE statements RBRACE
+statement       : LBRACE statements RBRACE      { $$ = $2; }
                 | declarestmt SEMICOLON
                 | ifstmt 
                 | whilestmt 
                 | expr SEMICOLON
                 ;
 
-declarestmt     : IDENTIFIER IDENTIFIER ASSIGN expr
+declarestmt     : IDENTIFIER IDENTIFIER ASSIGN expr     { $$ = ast_new($3); ast_append_child_all($$, $1, $2, $4); }
                 | IDENTIFIER IDENTIFIER
                 ;
 
-ifstmt          : IF expr statement ELSE statement
-                | IF expr statement
+ifstmt          : IF expr statement ELSE statement      { $$ = ast_new($1); ast_append_child_all($$, $2, $3, $5); }
+                | IF expr statement                     { $$ = ast_new($1); ast_append_child_all($$, $2, $3); }
                 ;
 
-whilestmt       : WHILE expr statement
-                | DO statement WHILE expr
+whilestmt       : WHILE expr statement                  { $$ = ast_new($1); ast_append_child_all($$, $2, $3); }
                 ;
 
 expr            : LPAREN expr RPAREN            { $$ = $2; }
                 | assign_expr
                 | call_expr
-                | expr boolean_op expr          { $$ = ast_new($2); /* add children */ }
-                | expr arithmetic_comp expr     { $$ = ast_new($2); /* add children */ }
-                | expr arithmetic_op expr       { $$ = ast_new($2); /* add children */ }
-                | IDENTIFIER                    { $$ = ast_new($1); if(0) printf("id %s\n", $1->value); }
-                | BOOLEAN                       { $$ = ast_new($1); if(0) printf("bool %s\n", $1->value); }
-                | INTEGER                       { $$ = ast_new($1); if(0) printf("int %s\n", $1->value); }
-                | FLOAT                         { $$ = ast_new($1); if(0) printf("flt %s\n", $1->value); }
-                | STRING                        { $$ = ast_new($1); if(0) printf("str %s\n", $1->value); }
+                | NOT expr                      { $$ = ast_new($1); ast_append_child($$, $2); }
+                | SUB expr %prec NEG            { $$ = ast_new($1); ast_append_child($$, $2); }
+                | expr boolean_op expr          { $$ = ast_new($2); ast_append_child_all($$, $1, $3); }
+                | expr arithmetic_comp expr     { $$ = ast_new($2); ast_append_child_all($$, $1, $3); }
+                | expr arithmetic_op expr       { $$ = ast_new($2); ast_append_child_all($$, $1, $3); }
+                | IDENTIFIER                    { $$ = ast_new($1); }
+                | BOOLEAN                       { $$ = ast_new($1); }
+                | INTEGER                       { $$ = ast_new($1); }
+                | FLOAT                         { $$ = ast_new($1); }
+                | STRING                        { $$ = ast_new($1); }
 /*
                 | INC IDENTIFIER
                 | DEC IDENTIFIER
@@ -152,7 +154,7 @@ expr            : LPAREN expr RPAREN            { $$ = $2; }
 */
                 ;
 
-assign_expr     : IDENTIFIER ASSIGN expr        { $$ = ast_new($2); }
+assign_expr     : IDENTIFIER ASSIGN expr        { $$ = ast_new($2); ast_append_child_all($$, $1, $3); }
                 ;
 
 call_expr       : IDENTIFIER LPAREN call_args RPAREN
@@ -163,7 +165,7 @@ call_args       : /* empty */
                 | expr
                 ;
 
-boolean_op      : NOT | EQ | AND | IOR | XOR
+boolean_op      : EQ | AND | IOR | XOR
                 ;
 arithmetic_comp : LT | LE | GE | GT
                 ;

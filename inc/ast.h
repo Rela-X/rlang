@@ -10,15 +10,21 @@ struct _token {
 
 typedef struct _ast Ast;
 struct _ast {
-	Token *token;
-	/** null-terminated array of child nodes */
-	Ast**children;
+	Token   *token;
+	/** linked list of child nodes */
+	Ast     *child;
+	/** next sibling in linked list */
+	Ast     *next;
 };
 
 Token * token_new(int type, char *value);
 void    token_free(Token *token);
 
 Ast *  ast_new(Token *token);
+
+void   ast_append_child(Ast *ast, Ast *child);
+#define ast_append_child_all(ast, ...) _ast_append_child_all(ast, __VA_ARGS__, NULL);
+void   _ast_append_child_all(Ast *ast, ...);
 
 void   ast_print_node(Ast *ast);
 void   ast_print_tree(Ast *ast);

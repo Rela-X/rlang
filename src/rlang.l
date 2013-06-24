@@ -6,7 +6,7 @@
 #include "ast.h"
 #include "rlang.tab.h"
 
-#define TOKEN(t) printf("%s\n", yytext); yylval.token = token_new(t, yytext); return t
+#define TOKEN(t) if(0) printf("%s\n", yytext); yylval.token = token_new(t, yytext); return t
 
 // http://flex.sourceforge.net/manual/Common-Patterns.html#Common-Patterns
 %}
