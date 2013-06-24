@@ -122,7 +122,7 @@ statement       : LBRACE statements RBRACE      { $$ = $2; }
                 | expr SEMICOLON
                 ;
 
-declarestmt     : IDENTIFIER IDENTIFIER ASSIGN expr     { $$ = ast_new($3); ast_append_child_all($$, $1, $2, $4); }
+declarestmt     : IDENTIFIER IDENTIFIER ASSIGN expr     { $$ = ast_new($3); ast_append_child_all($$, ast_new($1), ast_new($2), $4); }
                 | IDENTIFIER IDENTIFIER
                 ;
 
@@ -154,7 +154,7 @@ expr            : LPAREN expr RPAREN            { $$ = $2; }
 */
                 ;
 
-assign_expr     : IDENTIFIER ASSIGN expr        { $$ = ast_new($2); ast_append_child_all($$, $1, $3); }
+assign_expr     : IDENTIFIER ASSIGN expr        { $$ = ast_new($2); ast_append_child_all($$, ast_new($1), $3); }
                 ;
 
 call_expr       : IDENTIFIER LPAREN call_args RPAREN
