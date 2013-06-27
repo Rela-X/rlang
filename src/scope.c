@@ -11,7 +11,7 @@ scope_new(const Scope *p) {
 }
 
 Variable *
-scope_lookup(const Scope *scope, const char *varname) {
+scope_resolve(const Scope *scope, const char *varname) {
 	assert(scope != NULL);
 	assert(varname != NULL);
 	assert(varname[0] != '\0');

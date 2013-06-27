@@ -52,23 +52,29 @@ Befehle zur Ausgabe von Werten in verschiedenen Darstellungsformaten
 #define YYERROR_VERBOSE 1
 #define YYDEBUG 1
 
-extern int yylex();
+#include "rlang.tab.h"
 
 void
-yyerror(const char *yymsg) {
+yyerror(YYLTYPE *llocp, Ast **ast, const char *yymsg) {
 	printf("my_yyerror: %s\n", yymsg);
 }
-
-Ast *ast;
 
 %}
 
 %locations
+%define api.pure
+%parse-param {Ast **ast}
 
 %union {
         Ast *node;
         Token *token;
 }
+/*
+%printer { fprintf (yyoutput, "'%c'", $$); } <character>
+%printer { fprintf (yyoutput, "&%p", $$); } <*>
+%printer { fprintf (yyoutput, "\"%s\"", $$); } STRING1 string1
+%printer { fprintf (yyoutput, "<>"); } <>
+*/
 
 %destructor { } <*>
 %destructor { ast_free($$); } <node>
@@ -108,11 +114,11 @@ Ast *ast;
 
 %%
 
-program         : statements                    { ast = $$ = ast_new(NULL); ast_append_child($$, $1); }
+program         : statements                    { $$ = $1; *ast = ast_copy($$); }
                 ;
 
-statements      : statement statements          { ast_append_child($1, $2); }
-                | statement
+statements      : statements statement          { ast_append_child($1, $2); }
+                | statement                     { $$ = ast_new(NULL); ast_append_child($$, $1); }
                 ;
 
 statement       : LBRACE statements RBRACE      { $$ = $2; }

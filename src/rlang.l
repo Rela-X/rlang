@@ -1,4 +1,5 @@
 %option noyywrap
+%option bison-bridge
 
 %{
 #include <stdbool.h>
@@ -6,7 +7,7 @@
 #include "ast.h"
 #include "rlang.tab.h"
 
-#define TOKEN(t) if(0) printf("%s\n", yytext); yylval.token = token_new(t, yytext); return t
+#define TOKEN(t) yylval->token = token_new(t, yytext); return t
 
 // http://flex.sourceforge.net/manual/Common-Patterns.html#Common-Patterns
 %}
@@ -35,6 +36,9 @@ c99_floating_point	({dfc}|{hfc})
 ucn  		((\\u([[:xdigit:]]{4}))|(\\U([[:xdigit:]]{8})))
 nondigit	[_[:alpha:]]
 c99_id		([_[:alpha:]]|{ucn})([_[:alnum:]]|{ucn})*
+
+%x COMMENT
+%x BLOCKCOMMENT
 
 %%
 
@@ -82,6 +86,13 @@ c99_id		([_[:alpha:]]|{ucn})([_[:alnum:]]|{ucn})*
 {c99_id}		{ TOKEN(IDENTIFIER); }
 
 .		{ printf("UNHANDLED TOKEN \"%s\"\n", yytext); }
+
+"//"		{ BEGIN(COMMENT); }
+<COMMENT>\n	{ BEGIN(INITIAL); }
+<COMMENT>.	{ }
+"/*"			{ BEGIN(BLOCKCOMMENT); }
+<BLOCKCOMMENT>"*/"	{ BEGIN(INITIAL); }
+<BLOCKCOMMENT>.		{ }
 
 %%
 

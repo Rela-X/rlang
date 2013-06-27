@@ -12,7 +12,7 @@ struct _scope {
 }
 
 Scope *         scope_new(const Scope *parent);
-Variable *      scope_lookup(const Scope *scope, const char *varname);
+Variable *      scope_resolve(const Scope *scope, const char *varname);
 void            scope_push_var(const Scope *scope, const Variable *variable);
 void            scope_free(Scope *scope);
 

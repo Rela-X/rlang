@@ -18,9 +18,11 @@ struct _ast {
 };
 
 Token * token_new(int type, char *value);
+Token * token_copy(Token *token);
 void    token_free(Token *token);
 
 Ast *  ast_new(Token *token);
+Ast *  ast_copy(Ast *ast);
 
 void   ast_append_child(Ast *ast, Ast *child);
 #define ast_append_child_all(ast, ...) _ast_append_child_all(ast, __VA_ARGS__, NULL);
