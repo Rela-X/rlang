@@ -27,7 +27,7 @@ scope_resolve(const Scope *scope, const char *varname) {
 }
 
 void
-scope_push_var(const Scope *scope, const Variable *variable) {
+scope_define(const Scope *scope, const Variable *variable) {
 	assert(scope != NULL);
 	assert(variable != NULL);
 

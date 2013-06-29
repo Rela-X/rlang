@@ -1,7 +1,7 @@
 #ifndef SCOPE_H_
 #define SCOPE_H_
 
-#include "variable.h"
+#include "symbol.h"
 
 typedef Scope struct _scope;
 struct _scope {
@@ -12,8 +12,8 @@ struct _scope {
 }
 
 Scope *         scope_new(const Scope *parent);
-Variable *      scope_resolve(const Scope *scope, const char *varname);
-void            scope_push_var(const Scope *scope, const Variable *variable);
+void            scope_define(const Scope *scope, const Symbol *symbol);
+Symbol *        scope_resolve(const Scope *scope, const char *name);
 void            scope_free(Scope *scope);
 
 #endif
