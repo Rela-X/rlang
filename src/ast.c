@@ -5,36 +5,11 @@
 
 #include "ast.h"
 
-Token *
-token_new(int type, char *value) {
-	Token *t = malloc(sizeof(*t));
-	t->type = type;
-	t->value = strdup(value);
-
-	return t;
-}
-
-Token *
-token_copy(Token *t) {
-	assert(t != NULL);
-
-	Token *c = NULL;
-	c = token_new(t->type, t->value);
-
-	return c;
-}
-
-void token_free(Token *t) {
-	assert(t != NULL);
-
-	free(t->value);
-	free(t);
-}
-
 Ast *
-ast_new(Token *t) {
+ast_new(NodeType t) {
 	Ast *a = malloc(sizeof(*a));
-	a->token = t;
+	a->type = t;
+	a->value = NULL;
 	a->child = NULL;
 	a->next = NULL;
 
@@ -45,16 +20,12 @@ Ast *
 ast_copy(Ast *ast) {
 	assert(ast != NULL);
 
-	Token *t = ast->token;
-	if(t != NULL) { // NULL token
-		t = token_copy(t);
-		if(t == NULL) // copy failure
-			return NULL;
-	}
-
-	Ast *cpy = ast_new(t);
+	Ast *cpy = ast_new(ast->type);
 	if(cpy == NULL)
 		return NULL;
+
+	if(ast->value != NULL)
+		cpy->value = strdup(ast->value);
 
 	for(Ast *c = ast->child; c != NULL; c = c->next) {
 		Ast *ccpy = ast_copy(c);
@@ -92,21 +63,104 @@ void _ast_append_child_all(Ast *ast, ...) {
 void ast_print_node(Ast *ast) {
 	assert(ast != NULL);
 
-	printf("<%s>\n", (ast->token != NULL) ? ast->token->value : "null");
+	switch(ast->type) {
+	case NT_BOOLEAN:
+	case NT_INTEGER:
+	case NT_FLOAT:
+	case NT_STRING:
+	case NT_IDENTIFIER:
+		printf("%s", ast->value);
+		break;
+	case NT_BLOCK:
+		printf("do");
+		break;
+	case NT_DECLARESTMT:
+		printf("let");
+		break;
+	case NT_IFSTMT:
+		printf("if");
+		break;
+	case NT_WHILESTMT:
+		printf("while");
+		break;
+	case NT_ASSIGNMENT:
+		printf("set");
+		break;
+	case NT_NOT:
+		printf("!");
+		break;
+	case NT_EQ:
+		printf("==");
+		break;
+	case NT_AND:
+		printf("&&");
+		break;
+	case NT_IOR:
+		printf("||");
+		break;
+	case NT_XOR:
+		printf("!=");
+		break;
+	case NT_LT:
+		printf("<");
+		break;
+	case NT_LE:
+		printf("<=");
+		break;
+	case NT_GE:
+		printf(">=");
+		break;
+	case NT_GT:
+		printf(">");
+		break;
+	case NT_NEG:
+		printf("-");
+		break;
+	case NT_ADD:
+		printf("+");
+		break;
+	case NT_SUB:
+		printf("-");
+		break;
+	case NT_MUL:
+		printf("*");
+		break;
+	case NT_DIV:
+		printf("/");
+		break;
+	case NT_POW:
+		printf("**");
+		break;
+	case NT_MOD:
+		printf("%");
+		break;
+	default:
+		printf("%s:%d:%s TODO", __FILE__, __LINE__, __func__);
+	}
 }
 
 void ast_print_tree(Ast *ast) {
 	assert(ast != NULL);
 
-	if(ast->child == NULL) {
-		printf(" %s", (ast->token != NULL) ? ast->token->value : "null");
-	} else {
-		printf(" (%s", (ast->token != NULL) ? ast->token->value : "·");
-		for(Ast *c = ast->child; c != NULL; c = c->next) {
-			ast_print_tree(c);
-		}
-		printf(")");
+	switch(ast->type) {
+	case NT_BOOLEAN:
+	case NT_INTEGER:
+	case NT_FLOAT:
+	case NT_STRING:
+	case NT_IDENTIFIER:
+		ast_print_node(ast);
+		return; // no children
 	}
+
+	printf("(");
+	ast_print_node(ast);
+	printf(" ");
+	for(Ast *c = ast->child; c != NULL; c = c->next) {
+		ast_print_tree(c);
+		if(c->next != NULL)
+			printf(" ");
+	}
+	printf(")");
 }
 
 void ast_free(Ast *ast) {
@@ -116,6 +170,5 @@ void ast_free(Ast *ast) {
 		next = c->next;
 		ast_free(c);
 	}
-	if(ast->token != NULL) token_free(ast->token);
 	free(ast);
 }

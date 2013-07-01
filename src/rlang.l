@@ -7,7 +7,8 @@
 #include "ast.h"
 #include "rlang.tab.h"
 
-#define TOKEN(t) yylval->token = token_new(t, yytext); return t
+#define TOKEN(t) return t
+#define VALUE(v) yylval->value = strdup(yytext); return v
 
 // http://flex.sourceforge.net/manual/Common-Patterns.html#Common-Patterns
 %}
@@ -80,10 +81,10 @@ c99_id		([_[:alpha:]]|{ucn})([_[:alnum:]]|{ucn})*
 
 ";"		{ TOKEN(SEMICOLON); }
 
-"true"|"false"		{ TOKEN(BOOLEAN); }
-{c99_integer}		{ TOKEN(INTEGER); }
-{c99_floating_point}	{ TOKEN(FLOAT); }
-{c99_id}		{ TOKEN(IDENTIFIER); }
+"true"|"false"		{ VALUE(BOOLEAN); }
+{c99_integer}		{ VALUE(INTEGER); }
+{c99_floating_point}	{ VALUE(FLOAT); }
+{c99_id}		{ VALUE(IDENTIFIER); }
 
 .		{ printf("UNHANDLED TOKEN \"%s\"\n", yytext); }
 

@@ -1,5 +1,5 @@
 #include "ast.h"
-#include "scope.h"
+//#include "scope.h"
 
 extern int yyparse(Ast *ast);
 extern int yydebug;
@@ -14,8 +14,8 @@ main() {
 
 	ast_print_tree(root);
 
-	Scope *global_scope = scope_new(NULL);
-	check_symbols(root, global_scope);
+	//Scope *global_scope = scope_new(NULL);
+	//check_symbols(root, global_scope);
 
 	return value;
 }

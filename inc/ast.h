@@ -1,27 +1,29 @@
 #ifndef AST_H_
 #define AST_H_
 
-typedef struct _token Token;
-struct _token {
-	// enum yytokentype type;
-	int type;
-	char *value;
+enum _node_type {
+	NT_BLOCK, NT_DECLARESTMT, NT_IFSTMT, NT_WHILESTMT,
+	NT_ASSIGNMENT, 
+	NT_NEG, NT_NOT,
+	NT_EQ, NT_AND, NT_IOR, NT_XOR,
+	NT_LT, NT_LE, NT_GE, NT_GT,
+	NT_ADD, NT_SUB, NT_MUL, NT_DIV, NT_POW, NT_MOD,
+	NT_IDENTIFIER, NT_BOOLEAN, NT_INTEGER, NT_FLOAT, NT_STRING, NT_R
 };
+typedef enum _node_type NodeType;
 
 typedef struct _ast Ast;
 struct _ast {
-	Token   *token;
+        NodeType        type;
+	/** node value. May be NULL */
+	char    *value;
 	/** linked list of child nodes */
 	Ast     *child;
-	/** next sibling in linked list */
-	Ast     *next;
+        /** next sibling in linked list */
+        Ast     *next;
 };
 
-Token * token_new(int type, char *value);
-Token * token_copy(Token *token);
-void    token_free(Token *token);
-
-Ast *  ast_new(Token *token);
+Ast *  ast_new(NodeType type);
 Ast *  ast_copy(Ast *ast);
 
 void   ast_append_child(Ast *ast, Ast *child);
