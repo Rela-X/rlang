@@ -1,7 +1,7 @@
 #ifndef VARIABLE_H_
 #define VARIABLE_H_
 
-typedef Variable struct _variable;
+typedef struct _variable Variable;
 struct _variable {
         char	*name;
         // TODO type

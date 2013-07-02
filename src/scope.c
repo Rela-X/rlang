@@ -1,3 +1,5 @@
+#include <stdlib.h>
+#include <string.h>
 #include <assert.h>
 
 #include "scope.h"
@@ -6,20 +8,32 @@ Scope *
 scope_new(const Scope *p) {
 	Scope *s = malloc(sizeof(*s));
 	s->parent = p;
+	s->symbols = NULL;
 
 	return s;
 }
 
-Variable *
-scope_resolve(const Scope *scope, const char *varname) {
+void
+scope_define(Scope *scope, Symbol *symbol) {
 	assert(scope != NULL);
-	assert(varname != NULL);
-	assert(varname[0] != '\0');
+	assert(symbol != NULL);
+
+	symbol->next = scope->symbols;
+	scope->symbols = symbol;
+}
+
+Symbol *
+scope_resolve(const Scope *scope, const char *name) {
+	assert(scope != NULL);
+	assert(name != NULL);
+	assert(name[0] != '\0');
 
 	for(Scope *s = scope; s != NULL; s = s->parent) {
-		for(Variable *v = s->variables; v != NULL; v = v->next) {
-			if(strcmp(v->name, varname) == 0)
-				return v;
+		for(Symbol *sy = s->symbols; sy != NULL; sy = sy->next) {
+			assert(sy != NULL);
+			assert(sy->name != NULL);
+			if(strcmp(sy->name, name) == 0)
+				return sy;
 		}
 	}
 
@@ -27,20 +41,11 @@ scope_resolve(const Scope *scope, const char *varname) {
 }
 
 void
-scope_define(const Scope *scope, const Variable *variable) {
-	assert(scope != NULL);
-	assert(variable != NULL);
-
-	variable->next = scope->variables;
-	scope->variables = variable;
-}
-
-void
 scope_free(Scope *scope) {
 	assert(scope != NULL);
 
-	for(Variable *v = scope->variables, *next = NULL; v != NULL; v = next) {
-		next = v->next;
-		variable_free(v);
+	for(Symbol *sy = scope->symbols, *next = NULL; sy != NULL; sy = next) {
+		next = sy->next;
+		symbol_free(sy);
 	}
 }
