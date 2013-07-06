@@ -81,7 +81,7 @@ c99_id		([_[:alpha:]]|{ucn})([_[:alnum:]]|{ucn})*
 
 ";"		{ TOKEN(SEMICOLON); }
 
-"true"|"false"		{ VALUE(BOOLEAN); }
+"true"|"false"		{ VALUE(BOOLEAN); } // TODO Rule unused
 {c99_integer}		{ VALUE(INTEGER); }
 {c99_floating_point}	{ VALUE(FLOAT); }
 {c99_id}		{ VALUE(IDENTIFIER); }

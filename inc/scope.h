@@ -6,8 +6,8 @@
 typedef struct _scope Scope;
 struct _scope {
         /** Parent of this Scope. May be null */
-        Scope *parent;
-        /** Symbols as a linked-list */
+        const Scope *parent;
+        /** Symbol-table as a linked-list */
         Symbol *symbols;
 };
 

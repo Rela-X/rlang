@@ -8,7 +8,7 @@ vpath %.y src/
 INC     += -I ./
 INC     += -I inc/
 
-OBJ = main.o ast.o rlang.yy.o rlang.tab.o scope.o symbol.o scope_checker.o
+OBJ = main.o ast.o rlang.yy.o rlang.tab.o scope.o symbol.o types.o scope_checker.o type_checker.o
 
 .PHONY : all clean
 .PHONY : test

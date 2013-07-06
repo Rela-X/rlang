@@ -150,7 +150,7 @@ expr            : LPAREN expr RPAREN            { $$ = $2; }
                 | expr arithmetic_comp expr     { $$ = ast_new($2); ast_append_child_all($$, $1, $3); }
                 | expr arithmetic_op expr       { $$ = ast_new($2); ast_append_child_all($$, $1, $3); }
                 | identifier
-                | BOOLEAN                       { $$ = ast_new(NT_BOOLEAN); $$->value = $1; }
+                | BOOLEAN                       { $$ = ast_new(NT_BOOLEAN); $$->value = $1; } // TODO Rule unused
                 | INTEGER                       { $$ = ast_new(NT_INTEGER); $$->value = $1; }
                 | FLOAT                         { $$ = ast_new(NT_FLOAT); $$->value = $1; }
                 | STRING                        { $$ = ast_new(NT_STRING); $$->value = $1; }

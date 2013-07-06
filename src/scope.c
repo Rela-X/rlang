@@ -28,7 +28,7 @@ scope_resolve(const Scope *scope, const char *name) {
 	assert(name != NULL);
 	assert(name[0] != '\0');
 
-	for(Scope *s = scope; s != NULL; s = s->parent) {
+	for(const Scope *s = scope; s != NULL; s = s->parent) {
 		for(Symbol *sy = s->symbols; sy != NULL; sy = sy->next) {
 			assert(sy != NULL);
 			assert(sy->name != NULL);

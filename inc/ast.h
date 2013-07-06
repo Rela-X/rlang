@@ -1,6 +1,9 @@
 #ifndef AST_H_
 #define AST_H_
 
+#include "scope.h"
+#include "types.h"
+
 enum _node_type {
 	NT_BLOCK, NT_DECLARESTMT, NT_IFSTMT, NT_WHILESTMT,
 	NT_ASSIGNMENT, 
@@ -16,11 +19,18 @@ typedef struct _ast Ast;
 struct _ast {
         NodeType        type;
 	/** node value. May be NULL */
-	char    *value;
+	char            *value;
 	/** linked list of child nodes */
-	Ast     *child;
+	Ast             *child;
         /** next sibling in linked list */
-        Ast     *next;
+        Ast             *next;
+
+	/** which scope does the node belong to */
+	Scope           *scope;
+	/** which type does the node evaluate to */
+	RLangType       eval_type;
+	/** the symbol associated with this node. May be null */
+	Symbol          *symbol;
 };
 
 Ast *  ast_new(NodeType type);
