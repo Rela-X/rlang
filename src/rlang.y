@@ -68,7 +68,6 @@ yyerror(YYLTYPE *llocp, Ast **ast, const char *yymsg) {
 %union {
         Ast *node;
         char *value;
-        int token;
 }
 /*
 %printer { fprintf (yyoutput, "'%c'", $$); } <character>
@@ -83,7 +82,7 @@ yyerror(YYLTYPE *llocp, Ast **ast, const char *yymsg) {
 
 %type  <node>  program statements statement declarestmt ifstmt whilestmt expr assign_expr
 %type  <node>  identifier
-%type  <token> boolean_op arithmetic_comp arithmetic_op
+%type  <node>  boolean_op arithmetic_comp arithmetic_op
 
 %token <value> BOOLEAN INTEGER FLOAT STRING IDENTIFIER
 
@@ -146,9 +145,9 @@ expr            : LPAREN expr RPAREN            { $$ = $2; }
                 | call_expr
                 | NOT expr                      { $$ = ast_new(NT_NOT); ast_append_child($$, $2); }
                 | SUB expr %prec NEG            { $$ = ast_new(NT_NEG); ast_append_child($$, $2); }
-                | expr boolean_op expr          { $$ = ast_new($2); ast_append_child_all($$, $1, $3); }
-                | expr arithmetic_comp expr     { $$ = ast_new($2); ast_append_child_all($$, $1, $3); }
-                | expr arithmetic_op expr       { $$ = ast_new($2); ast_append_child_all($$, $1, $3); }
+                | expr boolean_op expr          { $$ = $2; ast_append_child_all($$, $1, $3); }
+                | expr arithmetic_comp expr     { $$ = $2; ast_append_child_all($$, $1, $3); }
+                | expr arithmetic_op expr       { $$ = $2; ast_append_child_all($$, $1, $3); }
                 | identifier
                 | BOOLEAN                       { $$ = ast_new(NT_BOOLEAN); $$->value = $1; } // TODO Rule unused
                 | INTEGER                       { $$ = ast_new(NT_INTEGER); $$->value = $1; }
@@ -173,22 +172,22 @@ call_args       : /* empty */
                 | expr
                 ;
 
-boolean_op      : EQ    { $$ = NT_EQ; }
-                | AND   { $$ = NT_AND; }
-                | IOR   { $$ = NT_IOR; }
-                | XOR   { $$ = NT_XOR; }
+boolean_op      : EQ    { $$ = ast_new(NT_EQ); }
+                | AND   { $$ = ast_new(NT_AND); }
+                | IOR   { $$ = ast_new(NT_IOR); }
+                | XOR   { $$ = ast_new(NT_XOR); }
                 ;
-arithmetic_comp : LT    { $$ = NT_LT; }
-                | LE    { $$ = NT_LE; }
-                | GE    { $$ = NT_GE; }
-                | GT    { $$ = NT_GT; }
+arithmetic_comp : LT    { $$ = ast_new(NT_LT); }
+                | LE    { $$ = ast_new(NT_LE); }
+                | GE    { $$ = ast_new(NT_GE); }
+                | GT    { $$ = ast_new(NT_GT); }
                 ;
-arithmetic_op   : ADD   { $$ = NT_ADD; }
-                | SUB   { $$ = NT_SUB; }
-                | MUL   { $$ = NT_MUL; }
-                | DIV   { $$ = NT_DIV; }
-                | POW   { $$ = NT_POW; }
-                | MOD   { $$ = NT_MOD; }
+arithmetic_op   : ADD   { $$ = ast_new(NT_ADD); }
+                | SUB   { $$ = ast_new(NT_SUB); }
+                | MUL   { $$ = ast_new(NT_MUL); }
+                | DIV   { $$ = ast_new(NT_DIV); }
+                | POW   { $$ = ast_new(NT_POW); }
+                | MOD   { $$ = ast_new(NT_MOD); }
                 ;
 
 identifier      : IDENTIFIER                    { $$ = ast_new(NT_IDENTIFIER); $$->value = $1; }
