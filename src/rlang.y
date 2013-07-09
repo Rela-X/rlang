@@ -54,6 +54,8 @@ Befehle zur Ausgabe von Werten in verschiedenen Darstellungsformaten
 
 #include "rlang.tab.h"
 
+int yylex(YYSTYPE *, YYLTYPE *);
+
 void
 yyerror(YYLTYPE *llocp, Ast **ast, const char *yymsg) {
 	printf("my_yyerror: %s\n", yymsg);

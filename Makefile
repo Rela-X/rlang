@@ -5,6 +5,8 @@ vpath %.c src/
 vpath %.l src/
 vpath %.y src/
 
+CFLAGS  += -D_POSIX_C_SOURCE=200809L
+
 INC     += -I ./
 INC     += -I inc/
 
