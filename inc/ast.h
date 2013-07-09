@@ -4,20 +4,20 @@
 #include "scope.h"
 #include "types.h"
 
-enum _node_type {
-	NT_BLOCK, NT_DECLARESTMT, NT_IFSTMT, NT_WHILESTMT,
-	NT_ASSIGNMENT, 
-	NT_NEG, NT_NOT,
-	NT_EQ, NT_AND, NT_IOR, NT_XOR,
-	NT_LT, NT_LE, NT_GE, NT_GT,
-	NT_ADD, NT_SUB, NT_MUL, NT_DIV, NT_POW, NT_MOD,
-	NT_IDENTIFIER, NT_BOOLEAN, NT_INTEGER, NT_FLOAT, NT_STRING, NT_R
+enum _node_class {
+	N_BLOCK, N_DECLARESTMT, N_IFSTMT, N_WHILESTMT,
+	N_ASSIGNMENT,
+	N_NEG, N_NOT,
+	N_EQ, N_AND, N_IOR, N_XOR,
+	N_LT, N_LE, N_GE, N_GT,
+	N_ADD, N_SUB, N_MUL, N_DIV, N_POW, N_MOD,
+	N_IDENTIFIER, N_BOOLEAN, N_INTEGER, N_FLOAT, N_STRING, N_R
 };
-typedef enum _node_type NodeType;
+typedef enum _node_class NodeClass;
 
 typedef struct _ast Ast;
 struct _ast {
-        NodeType        type;
+        NodeClass       class;
         /** node value. May be NULL */
         char            *value;
         /** linked list of child nodes */
@@ -30,11 +30,11 @@ struct _ast {
         /** the symbol associated with this node. May be null */
         Symbol          *symbol;
         /** which type does the node evaluate to. Initialized as -1 */
-        RLangType       eval_type;
-        RLangType       promoted_type;
+        Type            eval_type;
+        Type            promoted_type;
 };
 
-Ast *  ast_new(NodeType type);
+Ast *  ast_new(NodeClass type);
 Ast *  ast_copy(Ast *ast);
 
 void   ast_append_child(Ast *ast, Ast *child);

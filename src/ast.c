@@ -6,15 +6,15 @@
 #include "ast.h"
 
 Ast *
-ast_new(NodeType t) {
+ast_new(NodeClass c) {
 	Ast *a = malloc(sizeof(*a));
-	a->type = t;
+	a->class = c;
 	a->value = NULL;
 	a->child = NULL;
 	a->next = NULL;
 
-	a->eval_type = rl_NONE;
-	a->promoted_type = rl_NONE;
+	a->eval_type = T_NONE;
+	a->promoted_type = T_NONE;
 
 	return a;
 }
@@ -23,7 +23,7 @@ Ast *
 ast_copy(Ast *ast) {
 	assert(ast != NULL);
 
-	Ast *cpy = ast_new(ast->type);
+	Ast *cpy = ast_new(ast->class);
 	if(cpy == NULL)
 		return NULL;
 
@@ -66,75 +66,75 @@ void _ast_append_child_all(Ast *ast, ...) {
 void ast_print_node(Ast *ast) {
 	assert(ast != NULL);
 
-	switch(ast->type) {
-	case NT_BOOLEAN:
-	case NT_INTEGER:
-	case NT_FLOAT:
-	case NT_STRING:
-	case NT_IDENTIFIER:
+	switch(ast->class) {
+	case N_BOOLEAN:
+	case N_INTEGER:
+	case N_FLOAT:
+	case N_STRING:
+	case N_IDENTIFIER:
 		printf("%s", ast->value);
 		break;
-	case NT_BLOCK:
+	case N_BLOCK:
 		printf("do");
 		break;
-	case NT_DECLARESTMT:
+	case N_DECLARESTMT:
 		printf("let");
 		break;
-	case NT_IFSTMT:
+	case N_IFSTMT:
 		printf("if");
 		break;
-	case NT_WHILESTMT:
+	case N_WHILESTMT:
 		printf("while");
 		break;
-	case NT_ASSIGNMENT:
+	case N_ASSIGNMENT:
 		printf("set");
 		break;
-	case NT_NOT:
+	case N_NOT:
 		printf("!");
 		break;
-	case NT_EQ:
+	case N_EQ:
 		printf("==");
 		break;
-	case NT_AND:
+	case N_AND:
 		printf("&&");
 		break;
-	case NT_IOR:
+	case N_IOR:
 		printf("||");
 		break;
-	case NT_XOR:
+	case N_XOR:
 		printf("!=");
 		break;
-	case NT_LT:
+	case N_LT:
 		printf("<");
 		break;
-	case NT_LE:
+	case N_LE:
 		printf("<=");
 		break;
-	case NT_GE:
+	case N_GE:
 		printf(">=");
 		break;
-	case NT_GT:
+	case N_GT:
 		printf(">");
 		break;
-	case NT_NEG:
+	case N_NEG:
 		printf("-");
 		break;
-	case NT_ADD:
+	case N_ADD:
 		printf("+");
 		break;
-	case NT_SUB:
+	case N_SUB:
 		printf("-");
 		break;
-	case NT_MUL:
+	case N_MUL:
 		printf("*");
 		break;
-	case NT_DIV:
+	case N_DIV:
 		printf("/");
 		break;
-	case NT_POW:
+	case N_POW:
 		printf("**");
 		break;
-	case NT_MOD:
+	case N_MOD:
 		printf("%%");
 		break;
 	default:
@@ -145,12 +145,12 @@ void ast_print_node(Ast *ast) {
 void ast_print_tree(Ast *ast) {
 	assert(ast != NULL);
 
-	switch(ast->type) {
-	case NT_BOOLEAN:
-	case NT_INTEGER:
-	case NT_FLOAT:
-	case NT_STRING:
-	case NT_IDENTIFIER:
+	switch(ast->class) {
+	case N_BOOLEAN:
+	case N_INTEGER:
+	case N_FLOAT:
+	case N_STRING:
+	case N_IDENTIFIER:
 		ast_print_node(ast);
 		return; // no children
 	default:

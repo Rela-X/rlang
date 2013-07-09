@@ -12,19 +12,19 @@ init_global_scope(Scope *global_scope) {
 	Symbol *sy;
 
 	scope_define(global_scope, sy = symbol_new("bool"));
-	sy->eval_type = rl_BOOL;
+	sy->eval_type = T_BOOL;
 
 	scope_define(global_scope, sy = symbol_new("int"));
-	sy->eval_type = rl_INT;
+	sy->eval_type = T_INT;
 
 	scope_define(global_scope, sy = symbol_new("float"));
-	sy->eval_type = rl_FLOAT;
+	sy->eval_type = T_FLOAT;
 
 	scope_define(global_scope, sy = symbol_new("String"));
-	sy->eval_type = rl_STRING;
+	sy->eval_type = T_STRING;
 
 	scope_define(global_scope, sy = symbol_new("R"));
-	sy->eval_type = rl_R;
+	sy->eval_type = T_R;
 }
 
 int

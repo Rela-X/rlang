@@ -14,15 +14,15 @@ check_symbols(Ast *ast) {
 	assert(ast->scope != NULL);
 
 	Scope *current_scope = ast->scope;
-	switch(ast->type) {
-	case NT_BLOCK:
+	switch(ast->class) {
+	case N_BLOCK:
 		check_block(ast);
 		assert(ast->scope != ast->child->scope);
 		break;
-	case NT_DECLARESTMT:
+	case N_DECLARESTMT:
 		check_declaration(ast);
 		break;
-	case NT_IDENTIFIER:
+	case N_IDENTIFIER:
 		check_identifier(ast);
 		assert(ast->symbol != NULL);
 		break;

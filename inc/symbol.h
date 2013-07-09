@@ -6,10 +6,10 @@
 
 typedef struct _symbol Symbol;
 struct _symbol {
-        char	        *name;
-        RLangType       eval_type;
+        char	*name;
+        Type    eval_type;
 
-        Symbol          *next;
+        Symbol  *next;
 };
 
 Symbol *        symbol_new(const char *name);
