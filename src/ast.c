@@ -13,6 +13,9 @@ ast_new(NodeType t) {
 	a->child = NULL;
 	a->next = NULL;
 
+	a->eval_type = rl_NONE;
+	a->promoted_type = rl_NONE;
+
 	return a;
 }
 
@@ -132,7 +135,7 @@ void ast_print_node(Ast *ast) {
 		printf("**");
 		break;
 	case NT_MOD:
-		printf("%");
+		printf("%%");
 		break;
 	default:
 		printf("%s:%d:%s TODO", __FILE__, __LINE__, __func__);
@@ -150,6 +153,8 @@ void ast_print_tree(Ast *ast) {
 	case NT_IDENTIFIER:
 		ast_print_node(ast);
 		return; // no children
+	default:
+		;
 	}
 
 	printf("(");

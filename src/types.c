@@ -14,6 +14,7 @@ static char *type_name_table[] = {
 
 void
 print_type(RLangType type) {
+	assert(type >= 0);
 	printf("type(%d) => %s", type, type_name_table[type]);
 }
 

@@ -5,24 +5,39 @@
 #include "types.h"
 
 static RLangType get_type(Ast *);
-static RLangType get_type_identifier(Ast *);
-static RLangType get_type_declaration(Ast *);
+static RLangType get_type_identifier(const Ast *);
+static RLangType get_type_declaration(const Ast *);
+static RLangType get_type_binary_op(const Ast *);
+static RLangType result_type(const RLangType type_table[NTYPES][NTYPES], Ast *, Ast *);
 
-static RLangType *arithmetic_result_type_table[] = {
-	                  /* void */ /* boolean */ /* integer */ /* float */ /* String */ /* R */
-	/* void */      { rl_VOID,   rl_VOID,      rl_VOID,      rl_VOID,    rl_VOID,     rl_VOID },
-	/* boolean */   { rl_VOID,   rl_VOID,      rl_VOID,      rl_VOID,    rl_VOID,     rl_VOID },
-	/* integer */   { rl_VOID,   rl_VOID,      rl_INT,       rl_FLOAT,   rl_VOID,     rl_VOID },
-	/* float */     { rl_VOID,   rl_VOID,      rl_FLOAT,     rl_FLOAT,   rl_VOID,     rl_VOID },
-	/* String */    { rl_VOID,   rl_VOID,      rl_VOID,      rl_VOID,    rl_VOID,     rl_VOID },
-	/* R */         { rl_VOID,   rl_VOID,      rl_VOID,      rl_VOID,    rl_VOID,     rl_VOID },
+static const RLangType arithmetic_result_type_table[NTYPES][NTYPES] = {
+                        /* void */ /* boolean */ /* integer */ /* float */ /* String */ /* R */
+        [rl_VOID]   = { rl_VOID,   rl_VOID,      rl_VOID,      rl_VOID,    rl_VOID,     rl_VOID },
+        [rl_BOOL]   = { rl_VOID,   rl_VOID,      rl_VOID,      rl_VOID,    rl_VOID,     rl_VOID },
+        [rl_INT]    = { rl_VOID,   rl_VOID,      rl_INT,       rl_FLOAT,   rl_VOID,     rl_VOID },
+        [rl_FLOAT]  = { rl_VOID,   rl_VOID,      rl_FLOAT,     rl_FLOAT,   rl_VOID,     rl_VOID },
+        [rl_STRING] = { rl_VOID,   rl_VOID,      rl_VOID,      rl_VOID,    rl_VOID,     rl_VOID },
+        [rl_R]      = { rl_VOID,   rl_VOID,      rl_VOID,      rl_VOID,    rl_VOID,     rl_VOID },
+};
+
+static const RLangType type_promotion_table[NTYPES][NTYPES] = {
+                        /* void */ /* boolean */ /* integer */ /* float */ /* String */ /* R */
+        [rl_VOID]   = { rl_NONE,   rl_NONE,      rl_NONE,      rl_NONE,    rl_NONE,     rl_NONE },
+        [rl_BOOL]   = { rl_NONE,   rl_NONE,      rl_NONE,      rl_NONE,    rl_NONE,     rl_NONE },
+        [rl_INT]    = { rl_NONE,   rl_NONE,      rl_NONE,      rl_FLOAT,   rl_NONE,     rl_NONE },
+        [rl_FLOAT]  = { rl_NONE,   rl_NONE,      rl_NONE,      rl_NONE,    rl_NONE,     rl_NONE },
+        [rl_STRING] = { rl_NONE,   rl_NONE,      rl_NONE,      rl_NONE,    rl_NONE,     rl_NONE },
+        [rl_R]      = { rl_NONE,   rl_NONE,      rl_NONE,      rl_NONE,    rl_NONE,     rl_NONE },
 };
 
 void
 check_types(Ast *ast) {
 	ast->eval_type = get_type(ast);
 
-ast_print_node(ast); printf(" evaluates to "); print_type(ast->eval_type); printf("\n");
+	assert(ast->eval_type != rl_NONE);
+ast_print_node(ast); printf(" evaluates to "); print_type(ast->eval_type);
+if(ast->promoted_type != rl_NONE) { printf(" (promoted to "); print_type(ast->promoted_type); printf(")"); }
+printf("\n");
 
 	/* we have gathered the type information for this tree already */
 	if(ast->eval_type != rl_VOID)
@@ -56,8 +71,9 @@ get_type(Ast *ast) {
 	case NT_LT: case NT_LE: case NT_GE: case NT_GT:
 		return rl_BOOL;
 	case NT_NEG:
+		return get_type(ast->child);
 	case NT_ADD: case NT_SUB: case NT_MUL: case NT_DIV: case NT_POW: case NT_MOD:
-		return get_type(ast->child); // TODO
+		return get_type_binary_op(ast);
 	default:
 		return rl_VOID;
 	}
@@ -65,7 +81,7 @@ get_type(Ast *ast) {
 
 static
 RLangType
-get_type_identifier(Ast *id) {
+get_type_identifier(const Ast *id) {
 	Symbol *sy = scope_resolve(id->scope, id->value);
 
 	return sy->eval_type;
@@ -73,21 +89,39 @@ get_type_identifier(Ast *id) {
 
 static
 RLangType
-get_type_declaration(Ast *declaration) {
+get_type_declaration(const Ast *declaration) {
 	Ast *type = declaration->child;
 	Ast *id = declaration->child->next;
+	Ast *expr = declaration->child->next->next;
 
 	/* set the type for the SYMBOL, not just for the id-node */
 	id->symbol->eval_type = get_type_identifier(type);
 
+	if(expr != NULL) {
+		check_types(expr);
+		expr->promoted_type = type_promotion_table[expr->eval_type][id->symbol->eval_type];
+	}
+
 	return rl_VOID;
 }
 
+static
 RLangType
-resultType(Ast *a, NodeType operator, Ast *b) {
+get_type_binary_op(const Ast *op) {
+	Ast *left = op->child;
+	Ast *right = op->child->next;
+	check_types(left);
+	check_types(right);
+	return result_type(arithmetic_result_type_table, left, right);
 }
 
+static
 RLangType
-promoteFromTo(RLangType from, NodeType operator, RLangType to) {
+result_type(const RLangType type_table[NTYPES][NTYPES], Ast *a, Ast *b) {
+	RLangType result = type_table[a->eval_type][b->eval_type];
+	a->promoted_type = type_promotion_table[a->eval_type][result];
+	b->promoted_type = type_promotion_table[b->eval_type][result];
+
+	return result;
 }
 

@@ -18,19 +18,20 @@ typedef enum _node_type NodeType;
 typedef struct _ast Ast;
 struct _ast {
         NodeType        type;
-	/** node value. May be NULL */
-	char            *value;
-	/** linked list of child nodes */
-	Ast             *child;
+        /** node value. May be NULL */
+        char            *value;
+        /** linked list of child nodes */
+        Ast             *child;
         /** next sibling in linked list */
         Ast             *next;
 
-	/** which scope does the node belong to */
-	Scope           *scope;
-	/** which type does the node evaluate to */
-	RLangType       eval_type;
-	/** the symbol associated with this node. May be null */
-	Symbol          *symbol;
+        /** which scope does the node belong to */
+        Scope           *scope;
+        /** the symbol associated with this node. May be null */
+        Symbol          *symbol;
+        /** which type does the node evaluate to. Initialized as -1 */
+        RLangType       eval_type;
+        RLangType       promoted_type;
 };
 
 Ast *  ast_new(NodeType type);
