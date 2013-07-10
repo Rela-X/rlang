@@ -6,11 +6,12 @@
 
 Scope *
 scope_new(const Scope *p) {
-	Scope *s = malloc(sizeof(*s));
-	s->parent = p;
-	s->symbols = NULL;
+	Scope *m = malloc(sizeof(*m));
+	assert(m != NULL);
+	m->parent = p;
+	m->symbols = NULL;
 
-	return s;
+	return m;
 }
 
 void

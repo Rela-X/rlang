@@ -10,7 +10,8 @@ CFLAGS  += -D_POSIX_C_SOURCE=200809L
 INC     += -I ./
 INC     += -I inc/
 
-OBJ = main.o ast.o rlang.yy.o rlang.tab.o scope.o symbol.o types.o scope_checker.o type_checker.o
+TREE_WALKER_OBJ = scope_annotator.o symbol_annotator.o type_annotator.o type_validator.o
+OBJ = main.o ast.o rlang.yy.o rlang.tab.o scope.o symbol.o types.o $(TREE_WALKER_OBJ)
 
 .PHONY : all clean
 .PHONY : test
@@ -24,7 +25,7 @@ all: $(TARGET)
 
 $(TARGET) : $(OBJ)
 	$(CC) $(CFLAGS) -o $(TARGET) $(LIBPATH) $(LIB) $^
-	
+
 clean:
 	rm -f $(OBJ) $(TARGET)
 	rm -f *.tab.c *.tab.h
@@ -32,13 +33,16 @@ clean:
 
 main.o : main.c 
 	$(CC) $(CFLAGS) -c $(INC) -o $@ $<
-	
+
 %.yy.o : %.yy.c
 	$(CC) $(CFLAGS) -c $(INC) -o $@ $<
 
 %.o : %.c %.h
 	$(CC) $(CFLAGS) -c $(INC) -o $@ $<
-                
+
+$(TREE_WALKER_OBJ) : %.o : %.c
+	$(CC) $(CFLAGS) -c $(INC) -o $@ $<
+
 %.tab.c %.tab.h : %.y
 	$(YACC) $(YFLAGS) -b $* $<
 

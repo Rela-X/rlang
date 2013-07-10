@@ -2,14 +2,15 @@
 #define TYPES_H_
 
 /* not including T_NONE */
-#define NTYPES 6
+#define NTYPES 7
 
-enum _rlang_type {
+enum _type {
 	T_NONE = -1,
-	T_VOID, T_BOOL, T_INT, T_FLOAT, T_STRING, T_R
+	T_VOID, T_BOOL, T_INT, T_FLOAT, T_STRING, T_SET, T_R
 };
-typedef enum _rlang_type Type;
+typedef enum _type Type;
 
 void    print_type(Type type);
 
 #endif
+

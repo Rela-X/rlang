@@ -175,6 +175,7 @@ call_args       : /* empty */
                 ;
 
 boolean_op      : EQ    { $$ = ast_new(N_EQ); }
+                | NEQ   { $$ = ast_new(N_NEQ); }
                 | AND   { $$ = ast_new(N_AND); }
                 | IOR   { $$ = ast_new(N_IOR); }
                 | XOR   { $$ = ast_new(N_XOR); }

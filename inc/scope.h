@@ -17,3 +17,4 @@ Symbol *        scope_resolve(const Scope *scope, const char *name);
 void            scope_free(Scope *scope);
 
 #endif
+

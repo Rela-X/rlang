@@ -7,6 +7,8 @@
 Symbol *
 symbol_new(const char *name) {
 	Symbol *m = malloc(sizeof(*m));
+	assert(m != NULL);
+	m->class = S_VARIABLE;
 	m->name = strdup(name);
 	m->eval_type = 0;
 
@@ -16,7 +18,9 @@ symbol_new(const char *name) {
 void
 symbol_free(Symbol *m) {
 	assert(m != NULL);
+	assert(m->name != NULL);
 
 	free(m->name);
 	free(m);
 }
+

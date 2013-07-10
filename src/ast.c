@@ -7,16 +7,17 @@
 
 Ast *
 ast_new(NodeClass c) {
-	Ast *a = malloc(sizeof(*a));
-	a->class = c;
-	a->value = NULL;
-	a->child = NULL;
-	a->next = NULL;
+	Ast *m = malloc(sizeof(*m));
+	assert(m != NULL);
+	m->class = c;
+	m->value = NULL;
+	m->child = NULL;
+	m->next = NULL;
 
-	a->eval_type = T_NONE;
-	a->promoted_type = T_NONE;
+	m->eval_type = T_NONE;
+	m->promoted_type = T_NONE;
 
-	return a;
+	return m;
 }
 
 Ast *
@@ -177,3 +178,4 @@ void ast_free(Ast *ast) {
 	}
 	free(ast);
 }
+

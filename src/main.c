@@ -11,20 +11,35 @@ void
 init_global_scope(Scope *global_scope) {
 	Symbol *sy;
 
-	scope_define(global_scope, sy = symbol_new("bool"));
+	sy = symbol_new("bool");
+	sy->class = S_TYPE;
 	sy->eval_type = T_BOOL;
+	scope_define(global_scope, sy);
 
-	scope_define(global_scope, sy = symbol_new("int"));
+	sy = symbol_new("int");
+	sy->class = S_TYPE;
 	sy->eval_type = T_INT;
+	scope_define(global_scope, sy);
 
-	scope_define(global_scope, sy = symbol_new("float"));
+	sy = symbol_new("float");
+	sy->class = S_TYPE;
 	sy->eval_type = T_FLOAT;
+	scope_define(global_scope, sy);
 
-	scope_define(global_scope, sy = symbol_new("String"));
+	sy = symbol_new("String");
+	sy->class = S_TYPE;
 	sy->eval_type = T_STRING;
+	scope_define(global_scope, sy);
 
-	scope_define(global_scope, sy = symbol_new("R"));
+	sy = symbol_new("Set");
+	sy->class = S_TYPE;
+	sy->eval_type = T_SET;
+	scope_define(global_scope, sy);
+
+	sy = symbol_new("R");
+	sy->class = S_TYPE;
 	sy->eval_type = T_R;
+	scope_define(global_scope, sy);
 }
 
 int
@@ -42,9 +57,11 @@ main() {
 	init_global_scope(global_scope);
 
 	root->scope = global_scope;
-	check_symbols(root);
+	ast_annotate_scopes(root);
+	ast_annotate_symbols(root);
 
-	check_types(root);
+	ast_annotate_types(root);
+	ast_validate_types(root);
 
 	return value;
 }

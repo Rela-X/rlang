@@ -14,7 +14,11 @@ static char *type_name_table[] = {
 
 void
 print_type(Type type) {
+	printf("type(%d)", type);
+
 	assert(type >= 0);
-	printf("type(%d) => %s", type, type_name_table[type]);
+	assert(type < NTYPES);
+
+	printf(" => %s", type_name_table[type]);
 }
 
