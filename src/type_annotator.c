@@ -66,7 +66,7 @@ annotate_tree(Ast *ast) {
 	case N_IDENTIFIER:
 		ast->eval_type = identifier(ast);
 		break;
-	case N_DECLARESTMT:
+	case N_DECLARATION:
 		ast->eval_type = declaration(ast);
 		break;
 	case N_NOT:

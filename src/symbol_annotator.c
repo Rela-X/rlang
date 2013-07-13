@@ -23,7 +23,7 @@ walk_tree(Ast *ast) {
 	assert(ast->scope != NULL);
 
 	switch(ast->class) {
-	case N_DECLARESTMT:
+	case N_DECLARATION:
 		declaration(ast);
 		break;
 	case N_IDENTIFIER:

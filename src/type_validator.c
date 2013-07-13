@@ -32,13 +32,13 @@ static
 void
 validate_tree(const Ast *ast) {
 	switch(ast->class) {
-	case N_DECLARESTMT:
+	case N_DECLARATION:
 		validate_declaration(ast);
 		break;
 	case N_ASSIGNMENT:
 		validate_assignment(ast);
 		break;
-	case N_IFSTMT:
+	case N_IF:
 		validate_ifstatement(ast);
 		break;
 	default:

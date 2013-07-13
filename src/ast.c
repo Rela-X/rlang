@@ -78,13 +78,13 @@ void ast_print_node(Ast *ast) {
 	case N_BLOCK:
 		printf("do");
 		break;
-	case N_DECLARESTMT:
+	case N_DECLARATION:
 		printf("let");
 		break;
-	case N_IFSTMT:
+	case N_IF:
 		printf("if");
 		break;
-	case N_WHILESTMT:
+	case N_WHILE:
 		printf("while");
 		break;
 	case N_ASSIGNMENT:

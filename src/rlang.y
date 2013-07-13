@@ -131,15 +131,15 @@ statement       : LBRACE statements RBRACE      { $$ = $2; }
                 | expr SEMICOLON
                 ;
 
-declarestmt     : identifier identifier ASSIGN expr     { $$ = ast_new(N_DECLARESTMT); ast_append_child_all($$, $1, $2, $4); }
-                | identifier identifier                 { $$ = ast_new(N_DECLARESTMT); ast_append_child_all($$, $1, $2); }
+declarestmt     : identifier identifier ASSIGN expr     { $$ = ast_new(N_DECLARATION); ast_append_child_all($$, $1, $2, $4); }
+                | identifier identifier                 { $$ = ast_new(N_DECLARATION); ast_append_child_all($$, $1, $2); }
                 ;
 
-ifstmt          : IF expr statement ELSE statement      { $$ = ast_new(N_IFSTMT); ast_append_child_all($$, $2, $3, $5); }
-                | IF expr statement                     { $$ = ast_new(N_IFSTMT); ast_append_child_all($$, $2, $3); }
+ifstmt          : IF expr statement ELSE statement      { $$ = ast_new(N_IF); ast_append_child_all($$, $2, $3, $5); }
+                | IF expr statement                     { $$ = ast_new(N_IF); ast_append_child_all($$, $2, $3); }
                 ;
 
-whilestmt       : WHILE expr statement                  { $$ = ast_new(N_WHILESTMT); ast_append_child_all($$, $2, $3); }
+whilestmt       : WHILE expr statement                  { $$ = ast_new(N_WHILE); ast_append_child_all($$, $2, $3); }
                 ;
 
 expr            : LPAREN expr RPAREN            { $$ = $2; }
