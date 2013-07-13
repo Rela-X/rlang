@@ -7,7 +7,7 @@
 
 static void walk_tree(Ast *);
 static void declaration(const Ast *);
-static Symbol * identifier(Ast *);
+static void identifier(Ast *);
 static inline Symbol * id_resolve_symbol(Ast *);
 
 void
@@ -27,7 +27,7 @@ walk_tree(Ast *ast) {
 		declaration(ast);
 		break;
 	case N_IDENTIFIER:
-		ast->symbol = identifier(ast);
+		identifier(ast);
 		assert(ast->symbol != NULL);
 		break;
 	default:
@@ -77,14 +77,14 @@ declaration(const Ast *declaration) {
 }
 
 static
-Symbol *
+void
 identifier(Ast *id) {
 	Symbol *sy = id_resolve_symbol(id);
-	if(sy == NULL) {
+	if(sy != NULL) {
+		id->symbol = sy;
+	} else {
 		printf("<%s> not found!\n", id->value);
 	}
-
-	return sy;
 }
 
 static inline

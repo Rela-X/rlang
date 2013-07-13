@@ -5,11 +5,11 @@
 #include "ast.h"
 #include "types.h"
 
-static void annotate_tree(Ast *);
-static Type identifier(const Ast *);
+static Type annotate_tree(Ast *);
 static Type declaration(const Ast *);
 static Type arithmetic_op(const Ast *);
 static Type relational_op(const Ast *);
+static Type identifier(const Ast *);
 static Type op_type(const Type type_table[NTYPES][NTYPES], const Ast *, const Ast *);
 
 static const Type arithmetic_result_type_table[NTYPES][NTYPES] = {
@@ -38,61 +38,56 @@ void
 ast_annotate_types(Ast *ast) {
 	printf("setting type annotations\n");
 
-	annotate_tree(ast);
+	ast->eval_type = annotate_tree(ast);
 }
 
 static
-void
+Type
 annotate_tree(Ast *ast) {
 	switch(ast->class) {
-	case N_BOOLEAN:
-		ast->eval_type = T_BOOL;
-		break;
-	case N_INTEGER:
-		ast->eval_type = T_INT;
-		break;
-	case N_FLOAT:
-		ast->eval_type = T_FLOAT;
-		break;
-	case N_STRING:
-		ast->eval_type = T_STRING;
-		break;
-	case N_SET:
-		ast->eval_type = T_SET;
-		break;
-	case N_R:
-		ast->eval_type = T_R;
-		break;
-	case N_IDENTIFIER:
-		ast->eval_type = identifier(ast);
-		break;
 	case N_DECLARATION:
-		ast->eval_type = declaration(ast);
-		break;
-	case N_NOT:
-		annotate_tree(ast->child);
-		ast->eval_type = ast->child->eval_type;
-		break;
-	case N_EQ: case N_AND: case N_IOR: case N_XOR:
-		ast->eval_type = T_BOOL; // TODO
-		break;
-	case N_LT: case N_LE: case N_GE: case N_GT:
-		ast->eval_type = relational_op(ast);
-		break;
+		return declaration(ast);
 	case N_NEG:
-		annotate_tree(ast->child);
-		ast->eval_type = ast->child->eval_type;
-		break;
-	case N_ADD: case N_SUB: case N_MUL: case N_DIV: case N_POW: case N_MOD:
-		ast->eval_type = arithmetic_op(ast);
-		break;
+	case N_NOT:
+		return annotate_tree(ast->child);
+	case N_EQ:
+	case N_NEQ:
+	case N_AND:
+	case N_IOR:
+	case N_XOR:
+		return T_BOOL; // TODO
+	case N_LT:
+	case N_LE:
+	case N_GE:
+	case N_GT:
+		return relational_op(ast);
+	case N_ADD:
+	case N_SUB:
+	case N_MUL:
+	case N_DIV:
+	case N_POW:
+	case N_MOD:
+		return arithmetic_op(ast);
+	case N_IDENTIFIER:
+		return identifier(ast);
+	case N_BOOLEAN:
+		return T_BOOL;
+	case N_INTEGER:
+		return T_INT;
+	case N_FLOAT:
+		return T_FLOAT;
+	case N_STRING:
+		return T_STRING;
+	case N_SET:
+		return T_SET;
+	case N_R:
+		return T_R;
 	default:
-		ast->eval_type = T_VOID;
 		for(Ast *c = ast->child; c != NULL; c = c->next) {
-			annotate_tree(c);
+			c->eval_type = annotate_tree(c);
 		}
+		return T_VOID;
 	}
-ast_print_node(ast); printf(" has type "); print_type(ast->eval_type); printf("\n");
 }
 
 static
@@ -112,10 +107,10 @@ declaration(const Ast *declaration) {
 	/* set the type for the SYMBOL, not just for the id-node */
 	id->symbol->eval_type = type->symbol->eval_type;
 
-	annotate_tree(type);
-	annotate_tree(id);
+	type->eval_type = annotate_tree(type);
+	id->eval_type = annotate_tree(id);
 	if(expr != NULL) {
-		annotate_tree(expr);
+		expr->eval_type = annotate_tree(expr);
 	}
 
 	return T_VOID;
@@ -127,8 +122,8 @@ arithmetic_op(const Ast *op) {
 	Ast *left = op->child;
 	Ast *right = op->child->next;
 
-	annotate_tree(left);
-	annotate_tree(right);
+	left->eval_type = annotate_tree(left);
+	right->eval_type = annotate_tree(right);
 
 	Type t = op_type(arithmetic_result_type_table, left, right);
 
@@ -141,8 +136,8 @@ relational_op(const Ast *op) {
 	Ast *left = op->child;
 	Ast *right = op->child->next;
 
-	annotate_tree(left);
-	annotate_tree(right);
+	right->eval_type = annotate_tree(left);
+	left->eval_type = annotate_tree(right);
 
 	Type t = op_type(relational_result_type_table, left, right);
 

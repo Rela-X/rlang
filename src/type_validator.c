@@ -6,9 +6,9 @@
 #include "types.h"
 
 static void validate_tree(const Ast *ast);
+static void validate_ifstatement(const Ast *);
 static void validate_declaration(const Ast *);
 static void validate_assignment(const Ast *);
-static void validate_ifstatement(const Ast *);
 static bool valid_as_type(Ast *, Type);
 
 static const Type type_promotion_table[NTYPES][NTYPES] = {
@@ -32,14 +32,14 @@ static
 void
 validate_tree(const Ast *ast) {
 	switch(ast->class) {
+	case N_IF:
+		validate_ifstatement(ast);
+		break;
 	case N_DECLARATION:
 		validate_declaration(ast);
 		break;
 	case N_ASSIGNMENT:
 		validate_assignment(ast);
-		break;
-	case N_IF:
-		validate_ifstatement(ast);
 		break;
 	default:
 		for(Ast *c = ast->child; c != NULL; c = c->next) {

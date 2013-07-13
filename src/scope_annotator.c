@@ -5,7 +5,7 @@
 #include "ast.h"
 #include "scope.h"
 
-static void annotate_tree(Ast *);
+static void annotate_tree(const Ast *);
 
 void
 ast_annotate_scopes(const Ast *ast) {
@@ -16,7 +16,7 @@ ast_annotate_scopes(const Ast *ast) {
 
 static
 void
-annotate_tree(Ast *ast) {
+annotate_tree(const Ast *ast) {
 	assert(ast->scope != NULL);
 
 	Scope *current_scope = ast->scope;
