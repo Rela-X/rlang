@@ -11,7 +11,7 @@ typedef enum _symbol_class SymbolClass;
 typedef struct _symbol Symbol;
 struct _symbol {
         SymbolClass     class;
-        char	        *name;
+        char            *name;
         Type            eval_type;
 
         Symbol          *next;

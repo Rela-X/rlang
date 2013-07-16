@@ -36,14 +36,14 @@ struct _ast {
 };
 
 Ast *  ast_new(NodeClass type);
-Ast *  ast_copy(Ast *ast);
+Ast *  ast_copy(const Ast *ast);
 
 void   ast_append_child(Ast *ast, Ast *child);
 #define ast_append_child_all(ast, ...) _ast_append_child_all(ast, __VA_ARGS__, NULL);
 void   _ast_append_child_all(Ast *ast, ...);
 
-void   ast_print_node(Ast *ast);
-void   ast_print_tree(Ast *ast);
+void   ast_print_node(const Ast *ast);
+void   ast_print_tree(const Ast *ast);
 
 void   ast_free(Ast *ast);
 
