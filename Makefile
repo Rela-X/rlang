@@ -51,4 +51,6 @@ $(TREE_WALKER_OBJ) : %.o : %.c
 
 # test
 test : rlang
-	valgrind --quiet ./$< < test.rlang
+	valgrind --quiet ./$< < test/scopesNsymbols.rlang
+	valgrind --quiet ./$< < test/test.rlang
+

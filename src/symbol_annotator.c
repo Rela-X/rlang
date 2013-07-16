@@ -8,8 +8,9 @@
 static void walk_tree(Ast *);
 static void declaration(Ast *, Ast *, Ast *);
 static void assignment(Ast *, Ast *);
-static void identifier(Ast *);
-static void annotate_identifier(Ast *id);
+static void type_identifier(Ast *);
+static void identifier_lookup(Ast *id);
+static void identifier(Ast *id);
 static inline Symbol *resolve_symbol(const Ast *);
 static inline Symbol *resolve_symbol_recursive(const Ast *);
 
@@ -33,7 +34,7 @@ walk_tree(Ast *ast) {
 		assignment(ast->child, ast->child->next);
 		break;
 	case N_IDENTIFIER:
-		identifier(ast);
+		identifier_lookup(ast);
 		assert(ast->symbol != NULL);
 		break;
 	default:
@@ -46,21 +47,20 @@ walk_tree(Ast *ast) {
 static
 void
 declaration(Ast *type, Ast *id, Ast *expr) {
-	type->symbol = resolve_symbol_recursive(type);
-	if(type->symbol == NULL || type->symbol->class != S_TYPE) {
-		printf("<%s> is not a valid type!\n", type->value);
-	}
+	type_identifier(type);
 
 	Symbol *sy;
 	/* check if identifier is a reserved word */
 	sy = resolve_symbol_recursive(id);
 	if(sy != NULL && sy->class == S_TYPE) {
 		printf("<%s> is not a valid name!\n", id->value);
+		return;
 	}
 	/* check if identifier is already defined in the current (!) scope */
 	sy = resolve_symbol(id);
 	if(sy != NULL && sy->class == S_VARIABLE) {
 		printf("<%s> already defined!\n", id->value);
+		return;
 	}
 
 	/* define symbol */
@@ -69,7 +69,7 @@ declaration(Ast *type, Ast *id, Ast *expr) {
 	if(expr != NULL) {
 		assignment(id, expr);
 	} else {
-		annotate_identifier(id);
+		identifier(id);
 	}
 }
 
@@ -79,14 +79,23 @@ assignment(Ast *id, Ast *expr) {
 	/* check expression first */
 	walk_tree(expr);
 
-	annotate_identifier(id);
+	identifier(id);
 	id->symbol->assigned = true;
 }
 
 static
 void
-identifier(Ast *id) {
-	annotate_identifier(id);
+type_identifier(Ast *type) {
+	type->symbol = resolve_symbol_recursive(type);
+	if(type->symbol == NULL || type->symbol->class != S_TYPE) {
+		printf("<%s> is not a valid type!\n", type->value);
+	}
+}
+
+static
+void
+identifier_lookup(Ast *id) {
+	identifier(id);
 	if(!id->symbol->assigned) {
 		printf("use of unassigned identifier <%s>!\n", id->value);
 	}
@@ -94,7 +103,7 @@ identifier(Ast *id) {
 
 static
 void
-annotate_identifier(Ast *id) {
+identifier(Ast *id) {
 	id->symbol = resolve_symbol_recursive(id);
 	if(id->symbol == NULL) {
 		printf("<%s> not found!\n", id->value);
@@ -114,3 +123,4 @@ resolve_symbol_recursive(const Ast *id) {
 	Symbol *sy = scope_resolve_recursive(id->scope, id->value);
 	return sy;
 }
+
