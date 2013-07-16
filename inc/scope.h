@@ -14,6 +14,7 @@ struct _scope {
 Scope *         scope_new(const Scope *parent);
 void            scope_define(Scope *scope, Symbol *symbol);
 Symbol *        scope_resolve(const Scope *scope, const char *name);
+Symbol *        scope_resolve_recursive(const Scope *scope, const char *name);
 void            scope_free(Scope *scope);
 
 #endif

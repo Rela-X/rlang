@@ -29,13 +29,25 @@ scope_resolve(const Scope *scope, const char *name) {
 	assert(name != NULL);
 	assert(name[0] != '\0');
 
+	for(Symbol *sy = scope->symbols; sy != NULL; sy = sy->next) {
+		assert(sy->name != NULL);
+		if(strcmp(sy->name, name) == 0)
+			return sy;
+	}
+
+	return NULL;
+}
+
+Symbol *
+scope_resolve_recursive(const Scope *scope, const char *name) {
+	assert(scope != NULL);
+	assert(name != NULL);
+	assert(name[0] != '\0');
+
 	for(const Scope *s = scope; s != NULL; s = s->parent) {
-		for(Symbol *sy = s->symbols; sy != NULL; sy = sy->next) {
-			assert(sy != NULL);
-			assert(sy->name != NULL);
-			if(strcmp(sy->name, name) == 0)
-				return sy;
-		}
+		Symbol *sy = scope_resolve(s, name);
+		if(sy != NULL)
+			return sy;
 	}
 
 	return NULL;
