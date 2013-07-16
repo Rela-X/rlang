@@ -63,5 +63,7 @@ main() {
 	ast_annotate_types(root);
 	ast_validate_types(root);
 
+	ast_execute(root);
+
 	return value;
 }

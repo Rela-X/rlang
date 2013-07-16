@@ -10,7 +10,9 @@ CFLAGS  += -D_POSIX_C_SOURCE=200809L
 INC     += -I ./
 INC     += -I inc/
 
-TREE_WALKER_OBJ = scope_annotator.o symbol_annotator.o type_annotator.o type_validator.o
+LIB     += -lm
+
+TREE_WALKER_OBJ = scope_annotator.o symbol_annotator.o type_annotator.o type_validator.o executor.o
 OBJ = main.o ast.o rlang.yy.o rlang.tab.o scope.o symbol.o types.o $(TREE_WALKER_OBJ)
 
 .PHONY : all clean
@@ -51,4 +53,5 @@ $(TREE_WALKER_OBJ) : %.o : %.c
 
 # test
 test : rlang
-	valgrind --quiet ./$< < test.rlang
+	valgrind --quiet ./$< < test/scopesNsymbols.rlang
+	valgrind --quiet ./$< < test/test.rlang
