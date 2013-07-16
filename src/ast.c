@@ -21,7 +21,7 @@ ast_new(NodeClass c) {
 }
 
 Ast *
-ast_copy(Ast *ast) {
+ast_copy(const Ast *ast) {
 	assert(ast != NULL);
 
 	Ast *cpy = ast_new(ast->class);
@@ -64,7 +64,7 @@ void _ast_append_child_all(Ast *ast, ...) {
 	va_end(children);
 }
 
-void ast_print_node(Ast *ast) {
+void ast_print_node(const Ast *ast) {
 	assert(ast != NULL);
 
 	switch(ast->class) {
@@ -143,7 +143,7 @@ void ast_print_node(Ast *ast) {
 	}
 }
 
-void ast_print_tree(Ast *ast) {
+void ast_print_tree(const Ast *ast) {
 	assert(ast != NULL);
 
 	switch(ast->class) {
