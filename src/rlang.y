@@ -93,7 +93,7 @@ yyerror(YYLTYPE *llocp, Ast **ast, const char *yymsg) {
 %token WHILE DO
 
 %token LBRACE RBRACE LPAREN RPAREN
-%token SEMICOLON
+%token SEMICOLON COMMA
 
 %token NOT EQ AND IOR XOR       // boolean comparators
 %token LT LE GE GT              // arithmetic comparators
@@ -124,15 +124,27 @@ statements      : statements statement          { ast_append_child($1, $2); }
                 | statement                     { $$ = ast_new(N_BLOCK); ast_append_child($$, $1); }
                 ;
 
-statement       : LBRACE statements RBRACE      { $$ = $2; }
+statement       : block
                 | declarestmt SEMICOLON
+                | fndef
                 | ifstmt 
                 | whilestmt 
                 | expr SEMICOLON
                 ;
 
+block           : LBRACE statements RBRACE      { $$ = $2; }
+                ;
+
 declarestmt     : identifier identifier ASSIGN expr     { $$ = ast_new(N_DECLARATION); ast_append_child_all($$, $1, $2, $4); }
                 | identifier identifier                 { $$ = ast_new(N_DECLARATION); ast_append_child_all($$, $1, $2); }
+                ;
+
+fndef           : identifier identifier LPAREN fndef_args RPAREN block { $$ = ast_new(N_FNDEF); }
+                ;
+
+fndef_args      : /* empty */
+                | identifier identifier COMMA fndef_args
+                | identifier identifier
                 ;
 
 ifstmt          : IF expr statement ELSE statement      { $$ = ast_new(N_IF); ast_append_child_all($$, $2, $3, $5); }
@@ -170,7 +182,7 @@ call_expr       : identifier LPAREN call_args RPAREN
                 ;
 
 call_args       : /* empty */
-                | expr "," call_args
+                | expr COMMA call_args
                 | expr
                 ;
 

@@ -1,36 +1,11 @@
-#include <stdbool.h>
 #include <stdlib.h>
 #include <assert.h>
+
 #include <math.h>
+#include <string.h>
 
 #include "ast.h"
-
-union _value {
-	bool as_bool;
-	int as_int;
-	float as_float;
-	char *as_str;
-	/*
-	rf_Set *as_Set;
-	rf_Relation *as_R;
-	*/
-};
-typedef union _value Value;
-
-typedef struct _memory Memory;
-struct _memory {
-	Symbol  *symbol;
-	Value   value;
-
-	Memory  *next;
-};
-
-typedef struct _call_stack CallStack;
-struct _call_stack {
-	Memory          *mem;
-
-	CallStack       *next;
-};
+#include "memory.h"
 
 static void exec(const Ast *);
 static void block(const Ast *);
@@ -42,7 +17,10 @@ static Value eval(const Ast *);
 static Value assignment(const Ast *);
 static Value _neg(const Ast *);
 static Value _not(const Ast *);
-
+static Value _eq(const Ast *);
+static Value _neq(const Ast *);
+static Value _and(const Ast *);
+static Value _ior(const Ast *);
 static Value _lt(const Ast *);
 static Value _le(const Ast *);
 static Value _ge(const Ast *);
@@ -61,8 +39,11 @@ static Value _string(const Ast *);
 static Value _set(const Ast *);
 static Value _relation(const Ast *);
 
-static Memory *globals;
-static CallStack *call_stack;
+static MemorySpace *current_memspace = NULL;
+
+#define EQUALS(v1, v2) (_Generic((v1, v2),   \
+	bool, bool	: equals_bb(v1, v2), \
+	) (v1, v2)
 
 void
 ast_execute(const Ast *ast) {
@@ -116,16 +97,22 @@ printf("executing "); ast_print_node(ast); printf("\n");
 		eval(ast);
 		return;
 	}
-printf("FAIL "); ast_print_node(ast); printf("\n");
+printf("EXECFAIL "); ast_print_node(ast); printf("\n");
 	assert(false && "should not be reached");
 }
 
 static
 void
 block(const Ast *block) {
+	MemorySpace *new_memspace = memspace_new(current_memspace);
+	current_memspace = new_memspace;
+
 	for(Ast *c = block->child; c != NULL; c = c->next) {
 		exec(c);
 	}
+
+	current_memspace = current_memspace->parent;
+	memspace_free(new_memspace);
 }
 
 static
@@ -160,16 +147,18 @@ declaration(const Ast *declaration) {
 	Ast *id = declaration->child->next;
 	Ast *expr = declaration->child->next->next;
 
+	Memory *m = mem_new(id->symbol);
+	memspace_store(current_memspace, m);
+
 	if(expr != NULL) {
-		Value v;
-		v = eval(expr);
+		m->value = eval(expr);
 	}
-	assert(false); // TODO
 }
 
 static
 Value
 eval(const Ast *expr) {
+printf("evaluating "); ast_print_tree(expr); printf("\n");
 	switch(expr->class) {
 	case N_ASSIGNMENT:
 		return assignment(expr);
@@ -178,11 +167,15 @@ eval(const Ast *expr) {
 	case N_NOT:
 		return _not(expr);
 	case N_EQ:
+		return _eq(expr);
 	case N_NEQ:
+		return _neq(expr);
 	case N_AND:
+		return _and(expr);
 	case N_IOR:
+		return _ior(expr);
 	case N_XOR:
-		break;
+		return _neq(expr); // alias
 	case N_LT:
 		return _lt(expr);
 	case N_LE:
@@ -218,13 +211,18 @@ eval(const Ast *expr) {
 	case N_R:
 	*/
 	}
-printf("FAIL "); ast_print_node(expr); printf("\n");
+printf("EVALFAIL "); ast_print_node(expr); printf("\n");
 	assert(false && "should not be reached");
 }
 
 static
 Value
-assignment(const Ast *expr) {
+assignment(const Ast *ast) {
+	Ast *id = ast->child;
+	Ast *expr = ast->child->next;
+
+	Memory *m = memspace_load(current_memspace, id->symbol);
+	m->value = eval(expr);
 }
 
 static
@@ -251,7 +249,9 @@ Value
 _not(const Ast *expr) {
 	Ast *op1 = expr->child;
 	Value r;
+
 	assert(expr->eval_type == T_BOOL);
+
 	r.as_bool = ! eval(op1).as_bool;
 
 	return r;
@@ -259,20 +259,84 @@ _not(const Ast *expr) {
 
 static
 Value
+_eq(const Ast *expr) {
+	Ast *op1 = expr->child;
+	Ast *op2 = expr->child->next;
+	Value r;
+
+	Type t = (op1->promoted_type != T_NONE) ? op1->promoted_type : op1->eval_type;
+	switch(t) {
+	case T_BOOL:
+		r.as_bool = eval(op1).as_bool == eval(op2).as_bool;
+		break;
+	case T_INT:
+		r.as_bool = eval(op1).as_int == eval(op2).as_int;
+		break;
+	case T_FLOAT:
+		r.as_bool = eval(op1).as_float == eval(op2).as_float;
+		break;
+	case T_STRING:
+		r.as_bool = strcmp(eval(op1).as_str, eval(op2).as_str) == 0;
+		break;
+	case T_SET:
+		// TODO
+		break;
+	case T_R:
+		// TODO
+		break;
+	}
+
+	return r;
+}
+
+
+static
+Value
+_neq(const Ast *expr) {
+//	Ast *op1 = expr->child;
+//	Ast *op2 = expr->child->next;
+	Value r;
+
+	r.as_bool = ! _eq(expr).as_bool;
+
+	return r;
+}
+
+
+static
+Value
+_and(const Ast *expr) {
+	Ast *op1 = expr->child;
+	Ast *op2 = expr->child->next;
+	Value r;
+
+	r.as_bool = eval(op1).as_bool && eval(op2).as_bool;
+
+	return r;
+}
+
+
+static
+Value
+_ior(const Ast *expr) {
+	Ast *op1 = expr->child;
+	Ast *op2 = expr->child->next;
+	Value r;
+
+	r.as_bool = eval(op1).as_bool || eval(op2).as_bool;
+
+	return r;
+}
+
+
+static
+Value
 _lt(const Ast *expr) {
 	Ast *op1 = expr->child;
 	Ast *op2 = expr->child->next;
 	Value r;
-	switch(expr->eval_type) {
-	case T_INT:
-		r.as_bool = eval(op1).as_int < eval(op2).as_int;
-		break;
-	case T_FLOAT:
-		r.as_bool = eval(op1).as_float < eval(op1).as_float;
-		break;
-	default:
-		assert(false);
-	}
+
+	r.as_bool = eval(op1).as_float < eval(op2).as_float;
 
 	return r;
 }
@@ -283,16 +347,8 @@ _le(const Ast *expr) {
 	Ast *op1 = expr->child;
 	Ast *op2 = expr->child->next;
 	Value r;
-	switch(expr->eval_type) {
-	case T_INT:
-		r.as_bool = eval(op1).as_int <= eval(op2).as_int;
-		break;
-	case T_FLOAT:
-		r.as_bool = eval(op1).as_float <= eval(op1).as_float;
-		break;
-	default:
-		assert(false);
-	}
+
+	r.as_bool = eval(op1).as_float <= eval(op2).as_float;
 
 	return r;
 }
@@ -303,16 +359,8 @@ _ge(const Ast *expr) {
 	Ast *op1 = expr->child;
 	Ast *op2 = expr->child->next;
 	Value r;
-	switch(expr->eval_type) {
-	case T_INT:
-		r.as_bool = eval(op1).as_int >= eval(op2).as_int;
-		break;
-	case T_FLOAT:
-		r.as_bool = eval(op1).as_float >= eval(op1).as_float;
-		break;
-	default:
-		assert(false);
-	}
+
+	r.as_bool = eval(op1).as_float >= eval(op2).as_float;
 
 	return r;
 }
@@ -323,16 +371,8 @@ _gt(const Ast *expr) {
 	Ast *op1 = expr->child;
 	Ast *op2 = expr->child->next;
 	Value r;
-	switch(expr->eval_type) {
-	case T_INT:
-		r.as_bool = eval(op1).as_int > eval(op2).as_int;
-		break;
-	case T_FLOAT:
-		r.as_bool = eval(op1).as_float > eval(op1).as_float;
-		break;
-	default:
-		assert(false);
-	}
+
+	r.as_bool = eval(op1).as_float > eval(op2).as_float;
 
 	return r;
 }
@@ -348,7 +388,7 @@ _add(const Ast *expr) {
 		r.as_int = eval(op1).as_int + eval(op2).as_int;
 		break;
 	case T_FLOAT:
-		r.as_float = eval(op1).as_float + eval(op1).as_float;
+		r.as_float = eval(op1).as_float + eval(op2).as_float;
 		break;
 	default:
 		assert(false);
@@ -368,7 +408,7 @@ _sub(const Ast *expr) {
 		r.as_int = eval(op1).as_int - eval(op2).as_int;
 		break;
 	case T_FLOAT:
-		r.as_float = eval(op1).as_float - eval(op1).as_float;
+		r.as_float = eval(op1).as_float - eval(op2).as_float;
 		break;
 	default:
 		assert(false);
@@ -388,7 +428,7 @@ _mul(const Ast *expr) {
 		r.as_int = eval(op1).as_int * eval(op2).as_int;
 		break;
 	case T_FLOAT:
-		r.as_float = eval(op1).as_float * eval(op1).as_float;
+		r.as_float = eval(op1).as_float * eval(op2).as_float;
 		break;
 	default:
 		assert(false);
@@ -408,7 +448,7 @@ _div(const Ast *expr) {
 		r.as_int = eval(op1).as_int / eval(op2).as_int;
 		break;
 	case T_FLOAT:
-		r.as_float = eval(op1).as_float / eval(op1).as_float;
+		r.as_float = eval(op1).as_float / eval(op2).as_float;
 		break;
 	default:
 		assert(false);
@@ -428,7 +468,7 @@ _pow(const Ast *expr) {
 		r.as_int = (int)pow(eval(op1).as_float, eval(op2).as_float);
 		break;
 	case T_FLOAT:
-		r.as_float = pow(eval(op1).as_float, eval(op1).as_float);
+		r.as_float = pow(eval(op1).as_float, eval(op2).as_float);
 		break;
 	default:
 		assert(false);
@@ -448,7 +488,7 @@ _mod(const Ast *expr) {
 		r.as_int = eval(op1).as_int % eval(op2).as_int;
 		break;
 	case T_FLOAT:
-		r.as_float = fmod(eval(op1).as_float, eval(op1).as_float);
+		r.as_float = fmod(eval(op1).as_float, eval(op2).as_float);
 		break;
 	default:
 		assert(false);
@@ -460,6 +500,11 @@ _mod(const Ast *expr) {
 static
 Value
 identifier(const Ast *expr) {
+	Memory *m = memspace_load(current_memspace, expr->symbol);
+	assert(m != NULL);
+	Value r = m->value;
+
+	return r;
 }
 
 static

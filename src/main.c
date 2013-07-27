@@ -44,6 +44,11 @@ init_global_scope(Scope *global_scope) {
 
 int
 main() {
+float a = 1.23;
+float b = 3.45;
+void *x = &a;
+void *y = &b;
+printf("%f\n", *(float *)x + *(float *)y);
 	yydebug = 0;
 
 	Ast *root;

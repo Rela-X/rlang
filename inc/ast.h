@@ -5,7 +5,7 @@
 #include "types.h"
 
 enum _node_class {
-	N_BLOCK, N_IF, N_WHILE, N_DECLARATION,
+	N_BLOCK, N_IF, N_WHILE, N_DECLARATION, N_FNDEF,
 	N_ASSIGNMENT,
 	N_NEG, N_NOT,
 	N_EQ, N_NEQ,

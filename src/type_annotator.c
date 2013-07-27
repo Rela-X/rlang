@@ -7,10 +7,35 @@
 
 static Type annotate_tree(Ast *);
 static Type declaration(const Ast *);
+static Type unary_op(const Ast *);
+static Type equality_op(const Ast *);
+static Type boolean_op(const Ast *);
 static Type arithmetic_op(const Ast *);
 static Type relational_op(const Ast *);
 static Type identifier(const Ast *);
 static Type op_type(const Type type_table[NTYPES][NTYPES], const Ast *, const Ast *);
+
+static const Type equality_result_type_table[NTYPES][NTYPES] = {
+                       /* void */  /* boolean */ /* integer */ /* float */ /* String */ /* Set */ /* R */
+        [T_VOID]   = { T_VOID,     T_VOID,       T_VOID,       T_VOID,     T_VOID,      T_VOID,   T_VOID },
+        [T_BOOL]   = { T_VOID,     T_BOOL,       T_VOID,       T_VOID,     T_VOID,      T_VOID,   T_VOID },
+        [T_INT]    = { T_VOID,     T_VOID,       T_BOOL,       T_BOOL,     T_VOID,      T_VOID,   T_VOID },
+        [T_FLOAT]  = { T_VOID,     T_VOID,       T_BOOL,       T_BOOL,     T_VOID,      T_VOID,   T_VOID },
+        [T_STRING] = { T_VOID,     T_VOID,       T_VOID,       T_VOID,     T_BOOL,      T_VOID,   T_VOID },
+        [T_SET]    = { T_VOID,     T_VOID,       T_VOID,       T_VOID,     T_VOID,      T_BOOL,   T_VOID },
+        [T_R]      = { T_VOID,     T_VOID,       T_VOID,       T_VOID,     T_VOID,      T_VOID,   T_BOOL },
+};
+
+static const Type boolean_result_type_table[NTYPES][NTYPES] = {
+                       /* void */  /* boolean */ /* integer */ /* float */ /* String */ /* Set */ /* R */
+        [T_VOID]   = { T_VOID,     T_VOID,       T_VOID,       T_VOID,     T_VOID,      T_VOID,   T_VOID },
+        [T_BOOL]   = { T_VOID,     T_BOOL,       T_VOID,       T_VOID,     T_VOID,      T_VOID,   T_VOID },
+        [T_INT]    = { T_VOID,     T_VOID,       T_VOID,       T_VOID,     T_VOID,      T_VOID,   T_VOID },
+        [T_FLOAT]  = { T_VOID,     T_VOID,       T_VOID,       T_VOID,     T_VOID,      T_VOID,   T_VOID },
+        [T_STRING] = { T_VOID,     T_VOID,       T_VOID,       T_VOID,     T_VOID,      T_VOID,   T_VOID },
+        [T_SET]    = { T_VOID,     T_VOID,       T_VOID,       T_VOID,     T_VOID,      T_VOID,   T_VOID },
+        [T_R]      = { T_VOID,     T_VOID,       T_VOID,       T_VOID,     T_VOID,      T_VOID,   T_VOID },
+};
 
 static const Type arithmetic_result_type_table[NTYPES][NTYPES] = {
                        /* void */  /* boolean */ /* integer */ /* float */ /* String */ /* Set */ /* R */
@@ -49,13 +74,14 @@ annotate_tree(Ast *ast) {
 		return declaration(ast);
 	case N_NEG:
 	case N_NOT:
-		return annotate_tree(ast->child);
+		return unary_op(ast);
 	case N_EQ:
 	case N_NEQ:
+		return equality_op(ast);
 	case N_AND:
 	case N_IOR:
 	case N_XOR:
-		return T_BOOL; // TODO
+		return boolean_op(ast);
 	case N_LT:
 	case N_LE:
 	case N_GE:
@@ -94,6 +120,7 @@ static
 Type
 identifier(const Ast *id) {
 	assert(id->symbol != NULL);
+
 	return id->symbol->eval_type;
 }
 
@@ -114,6 +141,42 @@ declaration(const Ast *declaration) {
 	}
 
 	return T_VOID;
+}
+
+static
+Type
+unary_op(const Ast *op) {
+	op->child->eval_type = annotate_tree(op->child);
+
+	return op->child->eval_type;
+}
+
+static
+Type
+equality_op(const Ast *op) {
+	Ast *left = op->child;
+	Ast *right = op->child->next;
+
+	left->eval_type = annotate_tree(left);
+	right->eval_type = annotate_tree(right);
+
+	Type t = op_type(equality_result_type_table, left, right);
+
+	return t;
+}
+
+static
+Type
+boolean_op(const Ast *op) {
+	Ast *left = op->child;
+	Ast *right = op->child->next;
+
+	left->eval_type = annotate_tree(left);
+	right->eval_type = annotate_tree(right);
+
+	Type t = op_type(boolean_result_type_table, left, right);
+
+	return t;
 }
 
 static
