@@ -3,6 +3,18 @@
 #include "ast.h"
 
 void
+debug_tree(const Ast *ast) {
+	ast_print_tree(ast);
+	printf("\n");
+}
+
+void
+debug_node(const Ast *ast) {
+	ast_print_node(ast);
+	printf("\n");
+}
+
+void
 debug_symbol(const Ast *ast) {
 	Symbol *symbol = ast->symbol;
 

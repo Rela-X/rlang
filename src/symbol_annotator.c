@@ -6,10 +6,12 @@
 #include "scope.h"
 
 static void walk_tree(Ast *);
-static void declaration(Ast *, Ast *, Ast *);
+static void function(Ast *, Ast *, Ast *, Ast *);
+static void declaration(Ast *, Ast *);
 static void assignment(Ast *, Ast *);
 static void identifier(Ast *);
-static void annotate_identifier(Ast *id);
+static void annotate_type(Ast *);
+static void annotate_identifier(Ast *);
 static inline Symbol *resolve_symbol(const Ast *);
 static inline Symbol *resolve_symbol_recursive(const Ast *);
 
@@ -26,8 +28,11 @@ walk_tree(Ast *ast) {
 	assert(ast->scope != NULL);
 
 	switch(ast->class) {
+	case N_FNDEF:
+		function(ast->child, ast->child->next, ast->child->next->next, ast->child->next->next->next);
+		break;
 	case N_DECLARATION:
-		declaration(ast->child, ast->child->next, ast->child->next->next);
+		declaration(ast->child, ast->child->next);
 		break;
 	case N_ASSIGNMENT:
 		assignment(ast->child, ast->child->next);
@@ -45,11 +50,8 @@ walk_tree(Ast *ast) {
 
 static
 void
-declaration(Ast *type, Ast *id, Ast *expr) {
-	type->symbol = resolve_symbol_recursive(type);
-	if(type->symbol == NULL || type->symbol->class != S_TYPE) {
-		printf("<%s> is not a valid type!\n", type->value);
-	}
+function(Ast *type, Ast *id, Ast *args, Ast *block) {
+	annotate_type(type);
 
 	Symbol *sy;
 	/* check if identifier is a reserved word */
@@ -59,18 +61,38 @@ declaration(Ast *type, Ast *id, Ast *expr) {
 	}
 	/* check if identifier is already defined in the current (!) scope */
 	sy = resolve_symbol(id);
-	if(sy != NULL && sy->class == S_VARIABLE) {
+	if(sy != NULL) {
 		printf("<%s> already defined!\n", id->value);
 	}
 
 	/* define symbol */
-	scope_define(id->scope, symbol_new(id->value));
+	scope_define(id->scope, symbol_new(S_FUNCTION, id->value));
 
-	if(expr != NULL) {
-		assignment(id, expr);
-	} else {
-		annotate_identifier(id);
+	walk_tree(args);
+	walk_tree(block);
+}
+
+static
+void
+declaration(Ast *type, Ast *id) {
+	annotate_type(type);
+
+	Symbol *sy;
+	/* check if identifier is a reserved word */
+	sy = resolve_symbol_recursive(id);
+	if(sy != NULL && sy->class == S_TYPE) {
+		printf("<%s> is not a valid name!\n", id->value);
 	}
+	/* check if identifier is already defined in the current (!) scope */
+	sy = resolve_symbol(id);
+	if(sy != NULL) {
+		printf("<%s> already defined!\n", id->value);
+	}
+
+	/* define symbol */
+	scope_define(id->scope, symbol_new(S_VARIABLE, id->value));
+
+	annotate_identifier(id);
 }
 
 static
@@ -89,6 +111,15 @@ identifier(Ast *id) {
 	annotate_identifier(id);
 	if(!id->symbol->assigned) {
 		printf("use of unassigned identifier <%s>!\n", id->value);
+	}
+}
+
+static
+void
+annotate_type(Ast *type) {
+	type->symbol = resolve_symbol_recursive(type);
+	if(type->symbol == NULL || type->symbol->class != S_TYPE) {
+		printf("<%s> is not a valid type!\n", type->value);
 	}
 }
 

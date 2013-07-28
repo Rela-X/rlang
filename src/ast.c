@@ -79,7 +79,7 @@ void ast_print_node(const Ast *ast) {
 		printf("do");
 		break;
 	case N_DECLARATION:
-		printf("let");
+		printf("decl");
 		break;
 	case N_IF:
 		printf("if");

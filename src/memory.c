@@ -4,7 +4,7 @@
 #include "memory.h"
 
 MemorySpace *
-memspace_new(const MemorySpace *parent) {
+memspace_new(MemorySpace *parent) {
 	MemorySpace *m = malloc(sizeof(*m));
 	assert(m != NULL);
 	m->parent = parent;
@@ -14,10 +14,10 @@ memspace_new(const MemorySpace *parent) {
 }
 
 Memory *
-memspace_load(const MemorySpace *memory_space, const Symbol *symbol) {
+memspace_load(MemorySpace *memory_space, const Symbol *symbol) {
 	for(MemorySpace *ms = memory_space; ms != NULL; ms = ms->parent) {
-		for(Memory *m = ms->mem, *next = NULL; m != NULL; m = m->next) {
-			if(m->symbol = symbol)
+		for(Memory *m = ms->mem; m != NULL; m = m->next) {
+			if(m->symbol == symbol)
 				return m;
 		}
 	}

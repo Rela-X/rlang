@@ -129,16 +129,12 @@ Type
 declaration(const Ast *declaration) {
 	Ast *type = declaration->child;
 	Ast *id = declaration->child->next;
-	Ast *expr = declaration->child->next->next;
 
 	/* set the type for the SYMBOL, not just for the id-node */
 	id->symbol->eval_type = type->symbol->eval_type;
 
 	type->eval_type = annotate_tree(type);
 	id->eval_type = annotate_tree(id);
-	if(expr != NULL) {
-		expr->eval_type = annotate_tree(expr);
-	}
 
 	return T_VOID;
 }

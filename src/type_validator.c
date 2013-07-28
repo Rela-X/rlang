@@ -7,7 +7,6 @@
 
 static void validate_tree(const Ast *ast);
 static void validate_ifstatement(const Ast *);
-static void validate_declaration(const Ast *);
 static void validate_assignment(const Ast *);
 static bool valid_as_type(Ast *, Type);
 
@@ -35,9 +34,6 @@ validate_tree(const Ast *ast) {
 	case N_IF:
 		validate_ifstatement(ast);
 		break;
-	case N_DECLARATION:
-		validate_declaration(ast);
-		break;
 	case N_ASSIGNMENT:
 		validate_assignment(ast);
 		break;
@@ -45,29 +41,6 @@ validate_tree(const Ast *ast) {
 		for(Ast *c = ast->child; c != NULL; c = c->next) {
 			validate_tree(c);
 		}
-	}
-/*
-ast_print_node(ast); printf(" has type "); print_type(ast->eval_type);
-if(ast->promoted_type != T_NONE) { printf(" (promoted to "); print_type(ast->promoted_type); printf(")"); }
-printf("\n");
-*/
-}
-
-static
-void
-validate_declaration(const Ast *declaration) {
-	Ast *type = declaration->child;
-	Ast *id = declaration->child->next;
-	Ast *expr = declaration->child->next->next;
-
-	if(expr == NULL)
-		return;
-
-	if(!valid_as_type(expr, id->eval_type)) {
-		ast_print_tree(expr);
-		printf(" not a valid as ");
-		print_type(id->eval_type);
-		printf("\n");
 	}
 }
 
@@ -89,8 +62,8 @@ static
 void
 validate_ifstatement(const Ast *if_stmt) {
 	Ast *cond_expr = if_stmt->child;
-	Ast *then_stmt = if_stmt->child->next;
-	Ast *else_stmt = if_stmt->child->next->next;
+//	Ast *then_stmt = if_stmt->child->next;
+//	Ast *else_stmt = if_stmt->child->next->next;
 
 	if(!valid_as_type(cond_expr, T_BOOL)) {
 		ast_print_tree(cond_expr);

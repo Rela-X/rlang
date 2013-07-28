@@ -143,16 +143,11 @@ whilestat(const Ast *while_stmt) {
 static
 void 
 declaration(const Ast *declaration) {
-	Ast *type = declaration->child;
+//	Ast *type = declaration->child;
 	Ast *id = declaration->child->next;
-	Ast *expr = declaration->child->next->next;
 
 	Memory *m = mem_new(id->symbol);
 	memspace_store(current_memspace, m);
-
-	if(expr != NULL) {
-		m->value = eval(expr);
-	}
 }
 
 static

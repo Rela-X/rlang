@@ -82,9 +82,12 @@ yyerror(YYLTYPE *llocp, Ast **ast, const char *yymsg) {
 %destructor { free($$); } <value>
 %destructor { ast_free($$); } <node>
 
-%type  <node>  program statements statement declarestmt ifstmt whilestmt expr assign_expr
-%type  <node>  identifier
+%type  <node>  program statements statement
+%type  <node>  block if while
+%type  <node>  vardecl fndef fnargs
+%type  <node>  expr assign_expr call_expr call_args
 %type  <node>  boolean_op arithmetic_comp arithmetic_op
+%type  <node>  identifier
 
 %token <value> BOOLEAN INTEGER FLOAT STRING IDENTIFIER
 
@@ -125,33 +128,36 @@ statements      : statements statement          { ast_append_child($1, $2); }
                 ;
 
 statement       : block
-                | declarestmt SEMICOLON
-                | fndef
-                | ifstmt 
-                | whilestmt 
+                | declaration
+                | if
+                | while
                 | expr SEMICOLON
                 ;
 
 block           : LBRACE statements RBRACE      { $$ = $2; }
                 ;
 
-declarestmt     : identifier identifier ASSIGN expr     { $$ = ast_new(N_DECLARATION); ast_append_child_all($$, $1, $2, $4); }
-                | identifier identifier                 { $$ = ast_new(N_DECLARATION); ast_append_child_all($$, $1, $2); }
+declaration     : vardecl ASSIGN expr SEMICOLON         { $1->next = ast_new(N_ASSIGNMENT); ast_append_child_all($1->next, ast_copy($1->child->next), $3); }
+                | vardecl SEMICOLON
+                | fndef
                 ;
 
-fndef           : identifier identifier LPAREN fndef_args RPAREN block { $$ = ast_new(N_FNDEF); }
-                ;
-
-fndef_args      : /* empty */
-                | identifier identifier COMMA fndef_args
-                | identifier identifier
-                ;
-
-ifstmt          : IF expr statement ELSE statement      { $$ = ast_new(N_IF); ast_append_child_all($$, $2, $3, $5); }
+if              : IF expr statement ELSE statement      { $$ = ast_new(N_IF); ast_append_child_all($$, $2, $3, $5); }
                 | IF expr statement                     { $$ = ast_new(N_IF); ast_append_child_all($$, $2, $3); }
                 ;
 
-whilestmt       : WHILE expr statement                  { $$ = ast_new(N_WHILE); ast_append_child_all($$, $2, $3); }
+while           : WHILE expr statement                  { $$ = ast_new(N_WHILE); ast_append_child_all($$, $2, $3); }
+                ;
+
+vardecl         : identifier identifier                 { $$ = ast_new(N_DECLARATION); ast_append_child_all($$, $1, $2); }
+                ;
+
+fndef           : identifier identifier LPAREN fnargs RPAREN block { $$ = ast_new(N_FNDEF); ast_append_child_all($$, $1, $2, $4, $6);  }
+                ;
+
+fnargs          : fnargs COMMA vardecl          { ast_append_child($1, $3); }
+                | vardecl                       { $$ = ast_new(N_FNARGS); ast_append_child($$, $1); }
+                | /* empty */                   { $$ = ast_new(N_FNARGS); }
                 ;
 
 expr            : LPAREN expr RPAREN            { $$ = $2; }
@@ -182,7 +188,7 @@ call_expr       : identifier LPAREN call_args RPAREN
                 ;
 
 call_args       : /* empty */
-                | expr COMMA call_args
+                | call_args COMMA expr
                 | expr
                 ;
 

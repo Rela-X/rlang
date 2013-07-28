@@ -31,8 +31,8 @@ struct _memory_space {
 	Memory          *mem;
 };
 
-MemorySpace *   memspace_new(const MemorySpace *parent);
-Memory *        memspace_load(const MemorySpace *, const Symbol *);
+MemorySpace *   memspace_new(MemorySpace *parent);
+Memory *        memspace_load(MemorySpace *, const Symbol *);
 void            memspace_store(MemorySpace *, Memory *);
 void            memspace_free(MemorySpace *);
 
