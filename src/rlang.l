@@ -46,6 +46,7 @@ c99_id		([_[:alpha:]]|{ucn})([_[:alnum:]]|{ucn})*
 [ \t\r\n]+	{ }
 
 ":="		{ TOKEN(ASSIGN); }
+"="		{ TOKEN(ASSIGN); }
 "if"		{ TOKEN(IF); }
 "else"		{ TOKEN(ELSE); }
 "while"		{ TOKEN(WHILE); }
@@ -80,6 +81,7 @@ c99_id		([_[:alpha:]]|{ucn})([_[:alnum:]]|{ucn})*
 ")"		{ TOKEN(RPAREN); }
 
 ";"		{ TOKEN(SEMICOLON); }
+","		{ TOKEN(COMMA); }
 
 "true"|"false"		{ VALUE(BOOLEAN); } // TODO Rule unused
 {c99_integer}		{ VALUE(INTEGER); }

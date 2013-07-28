@@ -513,8 +513,10 @@ _bool(const Ast *expr) {
 	Value r;
 	char *s = expr->value;
 	if(s[0] == 't' && s[1] == 'r' && s[2] == 'u' && s[3] == 'e' && s[4] == '\0') {
+		// "true"
 		r.as_bool = true;
 	} else if(s[0] == 'f' && s[1] == 'a' && s[2] == 'l' && s[3] == 's' && s[4] == 'e' && s[5] == '\0') {
+		// "false"
 		r.as_bool = false;
 	} else {
 		assert(false);

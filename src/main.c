@@ -11,33 +11,27 @@ void
 init_global_scope(Scope *global_scope) {
 	Symbol *sy;
 
-	sy = symbol_new("bool");
-	sy->class = S_TYPE;
+	sy = symbol_new(S_TYPE, "bool");
 	sy->eval_type = T_BOOL;
 	scope_define(global_scope, sy);
 
-	sy = symbol_new("int");
-	sy->class = S_TYPE;
+	sy = symbol_new(S_TYPE, "int");
 	sy->eval_type = T_INT;
 	scope_define(global_scope, sy);
 
-	sy = symbol_new("float");
-	sy->class = S_TYPE;
+	sy = symbol_new(S_TYPE, "float");
 	sy->eval_type = T_FLOAT;
 	scope_define(global_scope, sy);
 
-	sy = symbol_new("String");
-	sy->class = S_TYPE;
+	sy = symbol_new(S_TYPE, "String");
 	sy->eval_type = T_STRING;
 	scope_define(global_scope, sy);
 
-	sy = symbol_new("Set");
-	sy->class = S_TYPE;
+	sy = symbol_new(S_TYPE, "Set");
 	sy->eval_type = T_SET;
 	scope_define(global_scope, sy);
 
-	sy = symbol_new("R");
-	sy->class = S_TYPE;
+	sy = symbol_new(S_TYPE, "R");
 	sy->eval_type = T_R;
 	scope_define(global_scope, sy);
 }

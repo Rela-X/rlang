@@ -6,7 +6,8 @@
 #include "types.h"
 
 enum _symbol_class {
-	S_TYPE, S_VARIABLE
+	S_NONE = -1,
+	S_TYPE, S_VARIABLE, S_FUNCTION
 };
 typedef enum _symbol_class SymbolClass;
 
@@ -22,7 +23,7 @@ struct _symbol {
         Symbol          *next;
 };
 
-Symbol *        symbol_new(const char *name);
+Symbol *        symbol_new(SymbolClass class, const char *name);
 
 void            symbol_free(Symbol *symbol);
 
