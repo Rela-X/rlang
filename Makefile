@@ -12,8 +12,8 @@ INC     += -I inc/
 
 LIB     += -lm
 
-TREE_WALKER_OBJ = scope_annotator.o symbol_annotator.o type_annotator.o type_validator.o executor.o debug.o
-OBJ = main.o ast.o rlang.yy.o rlang.tab.o memory.o scope.o symbol.o types.o $(TREE_WALKER_OBJ)
+TREE_WALKER_OBJ = scope_annotator.o symbol_annotator.o type_annotator.o type_validator.o executor.o
+OBJ = main.o ast.o rlang.yy.o rlang.tab.o memory.o print.o scope.o symbol.o $(TREE_WALKER_OBJ)
 
 .PHONY : all clean
 .PHONY : test

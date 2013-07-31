@@ -1,15 +1,26 @@
 #include <stdlib.h>
 
 #include "ast.h"
+#include "print.h"
 #include "scope.h"
 
 extern int yyparse(Ast **ast);
 extern int yydebug;
 
+extern void ast_annotate_scopes(Ast *);
+extern void ast_annotate_symbols(Ast *);
+extern void ast_annotate_types(Ast *);
+extern void ast_validate_types(Ast *);
+extern void ast_execute(Ast *);
+
 static
 void
 init_global_scope(Scope *global_scope) {
 	Symbol *sy;
+
+	sy = symbol_new(S_TYPE, "void");
+	sy->eval_type = T_VOID;
+	scope_define(global_scope, sy);
 
 	sy = symbol_new(S_TYPE, "bool");
 	sy->eval_type = T_BOOL;
@@ -38,19 +49,13 @@ init_global_scope(Scope *global_scope) {
 
 int
 main() {
-float a = 1.23;
-float b = 3.45;
-void *x = &a;
-void *y = &b;
-printf("%f\n", *(float *)x + *(float *)y);
 	yydebug = 0;
 
 	Ast *root;
 	int value;
 	value = yyparse(&root);
 
-	ast_print_tree(root);
-	printf("\n");
+	pt(root);
 
 	Scope *global_scope = scope_new(NULL);
 	init_global_scope(global_scope);

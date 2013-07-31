@@ -3,6 +3,7 @@
 #include <assert.h>
 
 #include "ast.h"
+#include "print.h"
 #include "types.h"
 
 static void validate_tree(const Ast *ast);
@@ -51,9 +52,9 @@ validate_assignment(const Ast *assignment) {
 	Ast *expr = assignment->child->next;
 
 	if(!valid_as_type(expr, id->eval_type)) {
-		ast_print_tree(expr);
+		print_tree(stdout, expr);
 		printf(" not a valid as ");
-		print_type(id->eval_type);
+		print_type(stdout, id->eval_type);
 		printf("\n");
 	}
 }
@@ -66,9 +67,9 @@ validate_ifstatement(const Ast *if_stmt) {
 //	Ast *else_stmt = if_stmt->child->next->next;
 
 	if(!valid_as_type(cond_expr, T_BOOL)) {
-		ast_print_tree(cond_expr);
+		print_tree(stdout, cond_expr);
 		printf(" not a valid as ");
-		print_type(T_BOOL);
+		print_type(stdout, T_BOOL);
 		printf("\n");
 	}
 }
