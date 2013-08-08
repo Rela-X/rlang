@@ -6,7 +6,6 @@
 #include "print.h"
 #include "scope.h"
 
-static void init_global_scope(Scope *);
 static void walk_tree(Ast *);
 static void function(Ast *, Ast *, Ast *, Ast *);
 static void annotate_return_stmts(Ast *, Symbol *);
@@ -23,29 +22,7 @@ void
 ast_annotate_symbols(Ast *ast) {
 	printf("setting and validating symbol annotations\n");
 
-	init_global_scope(ast->scope);
-
 	walk_tree(ast);
-}
-
-
-static
-void
-init_global_scope(Scope *global_scope) {
-#define def_type(name, type) do {               \
-	Symbol *sy = symbol_new(S_TYPE, name);  \
-	sy->eval_type = type;                   \
-	scope_define(global_scope, sy);         \
-	} while(0)
-
-	def_type("void", T_VOID);
-	def_type("bool", T_BOOL);
-	def_type("int", T_INT);
-	def_type("float", T_FLOAT);
-	def_type("String", T_STRING);
-	def_type("Set", T_SET);
-	def_type("R", T_R);
-#undef def_type
 }
 
 static
