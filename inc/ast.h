@@ -2,12 +2,13 @@
 #define AST_H_
 
 #include "scope.h"
+#include "symbol.h"
 #include "types.h"
 
 enum _node_class {
 	N_NONE = -1,
 	N_BLOCK, N_IF, N_WHILE, N_DECLARATION, N_FUNCTION, N_FUNCTIONARGS,
-	N_ASSIGNMENT, N_CALL, N_CALLARGS,
+	N_ASSIGNMENT, N_CALL, N_CALLARGS, N_RETURN,
 	N_NEG, N_NOT,
 	N_EQ, N_NEQ,
 	N_AND, N_IOR, N_XOR,

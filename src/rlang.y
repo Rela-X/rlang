@@ -71,20 +71,17 @@ yyerror(YYLTYPE *llocp, Ast **ast, const char *yymsg) {
         Ast *node;
         char *value;
 }
-/*
-%printer { fprintf (yyoutput, "'%c'", $$); } <character>
-%printer { fprintf (yyoutput, "&%p", $$); } <*>
-%printer { fprintf (yyoutput, "\"%s\"", $$); } STRING1 string1
-%printer { fprintf (yyoutput, "<>"); } <>
-*/
+
+%printer { print_node(yyoutput, $$); } <node>
+%printer { fprintf(yyoutput, "%s", $$); } <value>
 
 %destructor { } <*>
 %destructor { free($$); } <value>
 %destructor { ast_free($$); } <node>
 
 %type  <node>  program statements statement
-%type  <node>  block if while
-%type  <node>  vardecl fndef fnargs
+%type  <node>  block declaration if while
+%type  <node>  vardecl function function_args
 %type  <node>  expr assign_expr call_expr call_args
 %type  <node>  boolean_op arithmetic_comp arithmetic_op
 %type  <node>  identifier
@@ -94,6 +91,7 @@ yyerror(YYLTYPE *llocp, Ast **ast, const char *yymsg) {
 %token ASSIGN
 %token IF ELSE
 %token WHILE DO
+%token RETURN BREAK CONTINUE
 
 %token LBRACE RBRACE LPAREN RPAREN
 %token SEMICOLON COMMA
@@ -123,8 +121,8 @@ yyerror(YYLTYPE *llocp, Ast **ast, const char *yymsg) {
 program         : statements                    { $$ = $1; *ast = ast_copy($$); }
                 ;
 
-statements      : statements statement          { ast_append_child($1, $2); }
-                | statement                     { $$ = ast_new(N_BLOCK); ast_append_child($$, $1); }
+statements      : statement                     { $$ = ast_new(N_BLOCK); ast_append_child($$, $1); }
+                | statements statement          { ast_append_child($1, $2); }
                 ;
 
 statement       : block
@@ -132,6 +130,7 @@ statement       : block
                 | if
                 | while
                 | expr SEMICOLON
+                | RETURN expr SEMICOLON         { $$ = ast_new(N_RETURN); ast_append_child($$, $2); }
                 ;
 
 block           : LBRACE statements RBRACE      { $$ = $2; }
@@ -139,7 +138,7 @@ block           : LBRACE statements RBRACE      { $$ = $2; }
 
 declaration     : vardecl ASSIGN expr SEMICOLON         { $1->next = ast_new(N_ASSIGNMENT); ast_append_child_all($1->next, ast_copy($1->child->next), $3); }
                 | vardecl SEMICOLON
-                | fndef
+                | function
                 ;
 
 if              : IF expr statement ELSE statement      { $$ = ast_new(N_IF); ast_append_child_all($$, $2, $3, $5); }
@@ -152,12 +151,12 @@ while           : WHILE expr statement                  { $$ = ast_new(N_WHILE);
 vardecl         : identifier identifier                 { $$ = ast_new(N_DECLARATION); ast_append_child_all($$, $1, $2); }
                 ;
 
-fndef           : identifier identifier LPAREN fnargs RPAREN block { $$ = ast_new(N_FNDEF); ast_append_child_all($$, $1, $2, $4, $6);  }
+function        : identifier identifier LPAREN function_args RPAREN block { $$ = ast_new(N_FUNCTION); ast_append_child_all($$, $1, $2, $4, $6); }
                 ;
 
-fnargs          : fnargs COMMA vardecl          { ast_append_child($1, $3); }
-                | vardecl                       { $$ = ast_new(N_FNARGS); ast_append_child($$, $1); }
-                | /* empty */                   { $$ = ast_new(N_FNARGS); }
+function_args   : /* empty */                   { $$ = ast_new(N_FUNCTIONARGS); }
+                | vardecl                       { $$ = ast_new(N_FUNCTIONARGS); ast_append_child($$, $1); }
+                | function_args COMMA vardecl   { ast_append_child($1, $3); }
                 ;
 
 expr            : LPAREN expr RPAREN            { $$ = $2; }
@@ -169,7 +168,7 @@ expr            : LPAREN expr RPAREN            { $$ = $2; }
                 | expr arithmetic_comp expr     { $$ = $2; ast_append_child_all($$, $1, $3); }
                 | expr arithmetic_op expr       { $$ = $2; ast_append_child_all($$, $1, $3); }
                 | identifier
-                | BOOLEAN                       { $$ = ast_new(N_BOOLEAN); $$->value = $1; } // TODO Rule unused
+                | BOOLEAN                       { $$ = ast_new(N_BOOLEAN); $$->value = $1; }
                 | INTEGER                       { $$ = ast_new(N_INTEGER); $$->value = $1; }
                 | FLOAT                         { $$ = ast_new(N_FLOAT); $$->value = $1; }
                 | STRING                        { $$ = ast_new(N_STRING); $$->value = $1; }
@@ -181,15 +180,15 @@ expr            : LPAREN expr RPAREN            { $$ = $2; }
 */
                 ;
 
-assign_expr     : identifier ASSIGN expr        { $$ = ast_new(N_ASSIGNMENT); ast_append_child_all($$, $1, $3); }
+assign_expr     : identifier ASSIGN expr                { $$ = ast_new(N_ASSIGNMENT); ast_append_child_all($$, $1, $3); }
                 ;
 
-call_expr       : identifier LPAREN call_args RPAREN
+call_expr       : identifier LPAREN call_args RPAREN    { $$ = ast_new(N_CALL); ast_append_child_all($$, $1, $3); }
                 ;
 
-call_args       : /* empty */
-                | call_args COMMA expr
-                | expr
+call_args       : /* empty */                           { $$ = ast_new(N_CALLARGS); }
+                | expr                                  { $$ = ast_new(N_CALLARGS); ast_append_child($$, $1); }
+                | call_args COMMA expr                  { ast_append_child($1, $3); }
                 ;
 
 boolean_op      : EQ    { $$ = ast_new(N_EQ); }

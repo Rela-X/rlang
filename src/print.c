@@ -13,6 +13,7 @@ static char *node_name_table[] = {
 	[N_ASSIGNMENT] = "set", 
 	[N_CALL] = "call", 
 	[N_CALLARGS] = "cargs", 
+	[N_RETURN] = "return",
 	[N_NOT] = "!", 
 	[N_EQ] = "==", 
 	[N_AND] = "&&", 
@@ -64,11 +65,13 @@ void print_node(FILE *f, const Ast *ast) {
 
 void
 print_node_symbolinfo(FILE *f, const Ast *ast) {
-	assert(ast->symbol != NULL);
-
-	Symbol *symbol = ast->symbol;
+	assert(ast != NULL);
 
 	print_node(f, ast);
+
+	Symbol *symbol = ast->symbol;
+	assert(symbol != NULL);
+
 	fprintf(f, " has symbol <%s> ", symbol->name);
 	fprintf(f, "(");
 	fprintf(f, "assigned=%s|", (symbol->assigned) ? "yes" : "NO!");
@@ -78,6 +81,8 @@ print_node_symbolinfo(FILE *f, const Ast *ast) {
 
 void
 print_node_typeinfo(FILE *f, const Ast *ast) {
+	assert(ast != NULL);
+
 	print_node(f, ast);
 	fprintf(f, " has type ");
 	print_type(f, ast->eval_type);
@@ -118,9 +123,12 @@ void
 print_tree_symbolinfo(FILE *f, const Ast *ast) {
 	assert(ast != NULL);
 
-	print_node_symbolinfo(f, ast);
+	if(ast->symbol != NULL) {
+		print_node_symbolinfo(f, ast);
+		fprintf(f, "\n");
+	}
 	for(Ast *c = ast->child; c != NULL; c = c->next) {
-		print_node_symbolinfo(f, c);
+		print_tree_symbolinfo(f, c);
 	}
 }
 
@@ -129,8 +137,9 @@ print_tree_typeinfo(FILE *f, const Ast *ast) {
 	assert(ast != NULL);
 
 	print_node_typeinfo(f, ast);
+	fprintf(f, "\n");
 	for(Ast *c = ast->child; c != NULL; c = c->next) {
-		print_node_typeinfo(f, c);
+		print_tree_typeinfo(f, c);
 	}
 }
 

@@ -19,8 +19,18 @@ scope_define(Scope *scope, Symbol *symbol) {
 	assert(scope != NULL);
 	assert(symbol != NULL);
 
-	symbol->next = scope->symbols;
-	scope->symbols = symbol;
+	/* a scope serves double-duty as the argument
+	 * list of a function. Symbols must be stored
+	 * in the order in which they were defined.
+	 */
+	if(scope->symbols == NULL) {
+		scope->symbols = symbol;
+	} else {
+		Symbol *last = scope->symbols;
+		while(last->next != NULL)
+			last = last->next;
+		last->next = symbol;
+	}
 }
 
 Symbol *

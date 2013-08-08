@@ -12,6 +12,11 @@ symbol_new(SymbolClass class, const char *name) {
 	m->name = strdup(name);
 	m->eval_type = 0;
 
+	m->assigned = false;
+	m->read = false;
+
+	m->next = NULL;
+
 	return m;
 }
 

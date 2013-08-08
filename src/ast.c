@@ -12,10 +12,15 @@ ast_new(NodeClass c) {
 	m->class = c;
 	m->value = NULL;
 	m->child = NULL;
-	m->next = NULL;
+
+	m->scope = NULL;
+
+	m->symbol = NULL;
 
 	m->eval_type = T_NONE;
 	m->promoted_type = T_NONE;
+
+	m->next = NULL;
 
 	return m;
 }

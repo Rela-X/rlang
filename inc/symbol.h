@@ -3,6 +3,8 @@
 
 #include <stdbool.h>
 
+typedef struct _ast Ast;
+typedef struct _scope Scope;
 #include "types.h"
 
 enum _symbol_class {
@@ -15,10 +17,16 @@ typedef struct _symbol Symbol;
 struct _symbol {
         SymbolClass     class;
         char            *name;
+
+        Type            eval_type;
+
+        // S_VARIABLE
         bool            assigned;
         bool            read;
 
-        Type            eval_type;
+        // S_FUNCTION
+        Scope           *args;
+        Ast             *code;
 
         Symbol          *next;
 };

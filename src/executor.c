@@ -5,6 +5,7 @@
 #include <string.h>
 
 #include "ast.h"
+#include "print.h"
 #include "memory.h"
 
 static void exec(const Ast *);
@@ -12,9 +13,12 @@ static void block(const Ast *);
 static void ifstat(const Ast *);
 static void whilestat(const Ast *);
 static void declaration(const Ast *);
+static void function(const Ast *);
+static void returnstat(const Ast *);
 
 static Value eval(const Ast *);
 static Value assignment(const Ast *);
+static Value call(const Ast *);
 static Value _neg(const Ast *);
 static Value _not(const Ast *);
 static Value _eq(const Ast *);
@@ -39,11 +43,16 @@ static Value _string(const Ast *);
 static Value _set(const Ast *);
 static Value _relation(const Ast *);
 
-static MemorySpace *current_memspace = NULL;
+typedef struct _stack Stack;
+struct _stack {
+	MemorySpace     *memspace;
+	Stack           *next;
+};
 
-#define EQUALS(v1, v2) (_Generic((v1, v2),   \
-	bool, bool	: equals_bb(v1, v2), \
-	) (v1, v2)
+static bool callstack_unroll = false;
+static MemorySpace *current_memspace = NULL;
+static Value callstack_returnvalue;
+static Stack *call_stack = NULL;
 
 void
 ast_execute(const Ast *ast) {
@@ -55,7 +64,7 @@ ast_execute(const Ast *ast) {
 static
 void
 exec(const Ast *ast) {
-printf("executing "); ast_print_node(ast); printf("\n");
+printf("executing "); pn(ast);
 	switch(ast->class) {
 	case N_BLOCK:
 		block(ast);
@@ -69,7 +78,14 @@ printf("executing "); ast_print_node(ast); printf("\n");
 	case N_DECLARATION:
 		declaration(ast);
 		return;
+	case N_FUNCTION:
+		function(ast);
+		return;
+	case N_RETURN:
+		returnstat(ast);
+		return;
 	case N_ASSIGNMENT:
+	case N_CALL:
 	case N_NEG:
 	case N_NOT:
 	case N_EQ:
@@ -97,7 +113,7 @@ printf("executing "); ast_print_node(ast); printf("\n");
 		eval(ast);
 		return;
 	}
-printf("EXECFAIL "); ast_print_node(ast); printf("\n");
+printf("EXECFAIL %d ", ast->class); pn(ast);
 	assert(false && "should not be reached");
 }
 
@@ -107,7 +123,7 @@ block(const Ast *block) {
 	MemorySpace *new_memspace = memspace_new(current_memspace);
 	current_memspace = new_memspace;
 
-	for(Ast *c = block->child; c != NULL; c = c->next) {
+	for(Ast *c = block->child; c != NULL && !callstack_unroll; c = c->next) {
 		exec(c);
 	}
 
@@ -151,12 +167,28 @@ declaration(const Ast *declaration) {
 }
 
 static
+void
+function(const Ast *function) {
+	// TODO
+}
+
+static
+void
+returnstat(const Ast *return_stmt) {
+	Ast *expr = return_stmt->child;
+	callstack_returnvalue = eval(expr);
+	callstack_unroll = true;
+}
+
+static
 Value
 eval(const Ast *expr) {
-printf("evaluating "); ast_print_tree(expr); printf("\n");
+printf("evaluating "); pt(expr);
 	switch(expr->class) {
 	case N_ASSIGNMENT:
 		return assignment(expr);
+	case N_CALL:
+		return call(expr);
 	case N_NEG:
 		return _neg(expr);
 	case N_NOT:
@@ -206,7 +238,7 @@ printf("evaluating "); ast_print_tree(expr); printf("\n");
 	case N_R:
 	*/
 	}
-printf("EVALFAIL "); ast_print_node(expr); printf("\n");
+printf("EVALFAIL %d ", expr->class); pn(expr);
 	assert(false && "should not be reached");
 }
 
@@ -218,6 +250,51 @@ assignment(const Ast *ast) {
 
 	Memory *m = memspace_load(current_memspace, id->symbol);
 	m->value = eval(expr);
+
+printf("assigning ");
+switch(id->symbol->eval_type) {
+case T_INT:
+	printf("%d", m->value.as_int);
+	break;
+case T_FLOAT:
+	printf("%f", m->value.as_float);
+	break;
+default:
+	;
+}
+printf(" to %s\n", id->symbol->name);
+}
+
+static
+Value
+call(const Ast *expr) {
+	Ast *id = expr->child;
+	Ast *cargs = expr->child->next;
+	Value r;
+
+	MemorySpace *global_memspace = current_memspace;
+	while(global_memspace->parent != NULL)
+		global_memspace = global_memspace->parent;
+
+	MemorySpace *old_memspace = current_memspace;
+	current_memspace = memspace_new(global_memspace);
+
+	Ast *carg = cargs->child;
+	Symbol *farg = id->symbol->args->symbols;
+	for(; carg != NULL && farg != NULL; carg = carg->next, farg = farg->next) {
+		Memory *m = mem_new(farg);
+		m->value = eval(carg);
+		memspace_store(current_memspace, m);
+	}
+	exec(id->symbol->code);
+
+	r = callstack_returnvalue;
+	callstack_unroll = false;
+
+	memspace_free(current_memspace);
+	current_memspace = old_memspace;
+
+	return r;
 }
 
 static
@@ -386,6 +463,7 @@ _add(const Ast *expr) {
 		r.as_float = eval(op1).as_float + eval(op2).as_float;
 		break;
 	default:
+		pty(expr->eval_type);
 		assert(false);
 	}
 
