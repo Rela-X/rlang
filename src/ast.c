@@ -12,10 +12,15 @@ ast_new(NodeClass c) {
 	m->class = c;
 	m->value = NULL;
 	m->child = NULL;
-	m->next = NULL;
+
+	m->scope = NULL;
+
+	m->symbol = NULL;
 
 	m->eval_type = T_NONE;
 	m->promoted_type = T_NONE;
+
+	m->next = NULL;
 
 	return m;
 }
@@ -62,111 +67,6 @@ void _ast_append_child_all(Ast *ast, ...) {
 		ast_append_child(ast, child);
 	}
 	va_end(children);
-}
-
-void ast_print_node(const Ast *ast) {
-	assert(ast != NULL);
-
-	switch(ast->class) {
-	case N_BOOLEAN:
-	case N_INTEGER:
-	case N_FLOAT:
-	case N_STRING:
-	case N_IDENTIFIER:
-		printf("%s", ast->value);
-		break;
-	case N_BLOCK:
-		printf("do");
-		break;
-	case N_DECLARATION:
-		printf("let");
-		break;
-	case N_IF:
-		printf("if");
-		break;
-	case N_WHILE:
-		printf("while");
-		break;
-	case N_ASSIGNMENT:
-		printf("set");
-		break;
-	case N_NOT:
-		printf("!");
-		break;
-	case N_EQ:
-		printf("==");
-		break;
-	case N_AND:
-		printf("&&");
-		break;
-	case N_IOR:
-		printf("||");
-		break;
-	case N_XOR:
-		printf("!=");
-		break;
-	case N_LT:
-		printf("<");
-		break;
-	case N_LE:
-		printf("<=");
-		break;
-	case N_GE:
-		printf(">=");
-		break;
-	case N_GT:
-		printf(">");
-		break;
-	case N_NEG:
-		printf("-");
-		break;
-	case N_ADD:
-		printf("+");
-		break;
-	case N_SUB:
-		printf("-");
-		break;
-	case N_MUL:
-		printf("*");
-		break;
-	case N_DIV:
-		printf("/");
-		break;
-	case N_POW:
-		printf("**");
-		break;
-	case N_MOD:
-		printf("%%");
-		break;
-	default:
-		printf("%s:%d:%s TODO", __FILE__, __LINE__, __func__);
-	}
-}
-
-void ast_print_tree(const Ast *ast) {
-	assert(ast != NULL);
-
-	switch(ast->class) {
-	case N_BOOLEAN:
-	case N_INTEGER:
-	case N_FLOAT:
-	case N_STRING:
-	case N_IDENTIFIER:
-		ast_print_node(ast);
-		return; // no children
-	default:
-		;
-	}
-
-	printf("(");
-	ast_print_node(ast);
-	printf(" ");
-	for(Ast *c = ast->child; c != NULL; c = c->next) {
-		ast_print_tree(c);
-		if(c->next != NULL)
-			printf(" ");
-	}
-	printf(")");
 }
 
 void ast_free(Ast *ast) {

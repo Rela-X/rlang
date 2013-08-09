@@ -10,7 +10,5 @@ enum _type {
 };
 typedef enum _type Type;
 
-void    print_type(Type type);
-
 #endif
 

@@ -46,10 +46,12 @@ c99_id		([_[:alpha:]]|{ucn})([_[:alnum:]]|{ucn})*
 [ \t\r\n]+	{ }
 
 ":="		{ TOKEN(ASSIGN); }
+"="		{ TOKEN(ASSIGN); }
 "if"		{ TOKEN(IF); }
 "else"		{ TOKEN(ELSE); }
 "while"		{ TOKEN(WHILE); }
 "do"		{ TOKEN(DO); }
+"return"	{ TOKEN(RETURN); }
 
 "!"		{ TOKEN(NOT); }
 "=="		{ TOKEN(EQ); }
@@ -80,8 +82,10 @@ c99_id		([_[:alpha:]]|{ucn})([_[:alnum:]]|{ucn})*
 ")"		{ TOKEN(RPAREN); }
 
 ";"		{ TOKEN(SEMICOLON); }
+","		{ TOKEN(COMMA); }
 
-"true"|"false"		{ VALUE(BOOLEAN); } // TODO Rule unused
+"true"			{ VALUE(BOOLEAN); }
+"false"			{ VALUE(BOOLEAN); }
 {c99_integer}		{ VALUE(INTEGER); }
 {c99_floating_point}	{ VALUE(FLOAT); }
 {c99_id}		{ VALUE(IDENTIFIER); }

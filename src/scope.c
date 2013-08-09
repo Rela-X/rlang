@@ -9,7 +9,7 @@ scope_new(const Scope *p) {
 	Scope *m = malloc(sizeof(*m));
 	assert(m != NULL);
 	m->parent = p;
-	m->symbol = NULL;
+	m->symbols = NULL;
 
 	return m;
 }
@@ -19,8 +19,18 @@ scope_define(Scope *scope, Symbol *symbol) {
 	assert(scope != NULL);
 	assert(symbol != NULL);
 
-	symbol->next = scope->symbol;
-	scope->symbol = symbol;
+	/* a scope serves double-duty as the argument
+	 * list of a function. Symbols must be stored
+	 * in the order in which they were defined.
+	 */
+	if(scope->symbols == NULL) {
+		scope->symbols = symbol;
+	} else {
+		Symbol *last = scope->symbols;
+		while(last->next != NULL)
+			last = last->next;
+		last->next = symbol;
+	}
 }
 
 Symbol *
@@ -29,7 +39,7 @@ scope_resolve(const Scope *scope, const char *name) {
 	assert(name != NULL);
 	assert(name[0] != '\0');
 
-	for(Symbol *sy = scope->symbol; sy != NULL; sy = sy->next) {
+	for(Symbol *sy = scope->symbols; sy != NULL; sy = sy->next) {
 		assert(sy->name != NULL);
 		if(strcmp(sy->name, name) == 0)
 			return sy;
@@ -57,7 +67,7 @@ void
 scope_free(Scope *scope) {
 	assert(scope != NULL);
 
-	for(Symbol *sy = scope->symbol, *next = NULL; sy != NULL; sy = next) {
+	for(Symbol *sy = scope->symbols, *next = NULL; sy != NULL; sy = next) {
 		next = sy->next;
 		symbol_free(sy);
 	}

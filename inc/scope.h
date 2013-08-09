@@ -8,7 +8,7 @@ struct _scope {
         /** Parent of this Scope. May be null */
         const Scope *parent;
         /** Symbol-table as a linked-list */
-        Symbol *symbol;
+        Symbol *symbols;
 };
 
 Scope *         scope_new(const Scope *parent);

@@ -5,12 +5,17 @@
 #include "symbol.h"
 
 Symbol *
-symbol_new(const char *name) {
+symbol_new(SymbolClass class, const char *name) {
 	Symbol *m = malloc(sizeof(*m));
 	assert(m != NULL);
-	m->class = S_VARIABLE;
+	m->class = class;
 	m->name = strdup(name);
 	m->eval_type = 0;
+
+	m->assigned = false;
+	m->read = false;
+
+	m->next = NULL;
 
 	return m;
 }
