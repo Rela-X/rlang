@@ -53,7 +53,4 @@ $(TREE_WALKER_OBJ) : %.o : %.c
 
 # test
 test : rlang
-	valgrind --quiet ./$< < test/pass_test.rlang
-	valgrind --quiet ./$< < test/pass_scopesNsymbols.rlang
-	valgrind --quiet ./$< < test/pass_functions.rlang
-	valgrind --quiet ./$< < test/fail_scopesNsymbols.rlang
+	./test/runtests.sh
