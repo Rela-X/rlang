@@ -84,6 +84,8 @@ annotate_tree(Ast *ast) {
 		return return_stmt(ast);
 	case N_CALL:
 		return call(ast);
+	case N_IDENTIFIER:
+		return identifier(ast);
 	case N_NEG:
 	case N_NOT:
 		return unary_op(ast);
@@ -106,8 +108,6 @@ annotate_tree(Ast *ast) {
 	case N_POW:
 	case N_MOD:
 		return arithmetic_op(ast);
-	case N_IDENTIFIER:
-		return identifier(ast);
 	case N_BOOLEAN:
 		return T_BOOL;
 	case N_INTEGER:
@@ -190,6 +190,14 @@ call(const Ast *call) {
 
 static
 Type
+identifier(const Ast *id) {
+	Type t = get_symbol_type(id);
+
+	return t;
+}
+
+static
+Type
 unary_op(const Ast *op) {
 	op->child->eval_type = annotate_tree(op->child);
 
@@ -248,14 +256,6 @@ relational_op(const Ast *op) {
 	left->eval_type = annotate_tree(right);
 
 	Type t = op_type(relational_result_type_table, left, right);
-
-	return t;
-}
-
-static
-Type
-identifier(const Ast *id) {
-	Type t = get_symbol_type(id);
 
 	return t;
 }

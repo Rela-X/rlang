@@ -49,11 +49,11 @@ validate_tree(const Ast *ast) {
 	case N_RETURN:
 		validate_return(ast);
 		break;
-	case N_ASSIGNMENT:
-		validate_assignment(ast);
-		break;
 	case N_CALL:
 		validate_call(ast);
+		break;
+	case N_ASSIGNMENT:
+		validate_assignment(ast);
 		break;
 	default:
 		for(Ast *c = ast->child; c != NULL; c = c->next) {
@@ -82,15 +82,6 @@ validate_return(const Ast *return_stmt) {
 
 static
 void
-validate_assignment(const Ast *assignment) {
-	Ast *id = assignment->child;
-	Ast *expr = assignment->child->next;
-
-	expr_check_type(expr, id->eval_type);
-}
-
-static
-void
 validate_call(const Ast *call) {
 	Ast *id = call->child;
 	Ast *cargs = call->child->next;
@@ -104,6 +95,15 @@ validate_call(const Ast *call) {
 		print_tree(stdout, call);
 		printf(" has invalid number of args\n");
 	}
+}
+
+static
+void
+validate_assignment(const Ast *assignment) {
+	Ast *id = assignment->child;
+	Ast *expr = assignment->child->next;
+
+	expr_check_type(expr, id->eval_type);
 }
 
 static inline

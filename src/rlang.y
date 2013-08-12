@@ -148,9 +148,6 @@ if              : IF expr statement ELSE statement      { $$ = ast_new(N_IF); as
 while           : WHILE expr statement                  { $$ = ast_new(N_WHILE); ast_append_child_all($$, $2, $3); }
                 ;
 
-vardecl         : identifier identifier                 { $$ = ast_new(N_DECLARATION); ast_append_child_all($$, $1, $2); }
-                ;
-
 function        : identifier identifier LPAREN function_args RPAREN block { $$ = ast_new(N_FUNCTION); ast_append_child_all($$, $1, $2, $4, $6); }
                 ;
 
@@ -159,15 +156,18 @@ function_args   : /* empty */                   { $$ = ast_new(N_FUNCTIONARGS); 
                 | function_args COMMA vardecl   { ast_append_child($1, $3); }
                 ;
 
+vardecl         : identifier identifier                 { $$ = ast_new(N_DECLARATION); ast_append_child_all($$, $1, $2); }
+                ;
+
 expr            : LPAREN expr RPAREN            { $$ = $2; }
-                | assign_expr
                 | call_expr
+                | assign_expr
+                | identifier
                 | NOT expr                      { $$ = ast_new(N_NOT); ast_append_child($$, $2); }
                 | SUB expr %prec NEG            { $$ = ast_new(N_NEG); ast_append_child($$, $2); }
                 | expr boolean_op expr          { $$ = $2; ast_append_child_all($$, $1, $3); }
                 | expr arithmetic_comp expr     { $$ = $2; ast_append_child_all($$, $1, $3); }
                 | expr arithmetic_op expr       { $$ = $2; ast_append_child_all($$, $1, $3); }
-                | identifier
                 | BOOLEAN                       { $$ = ast_new(N_BOOLEAN); $$->value = $1; }
                 | INTEGER                       { $$ = ast_new(N_INTEGER); $$->value = $1; }
                 | FLOAT                         { $$ = ast_new(N_FLOAT); $$->value = $1; }
@@ -180,15 +180,18 @@ expr            : LPAREN expr RPAREN            { $$ = $2; }
 */
                 ;
 
-assign_expr     : identifier ASSIGN expr                { $$ = ast_new(N_ASSIGNMENT); ast_append_child_all($$, $1, $3); }
-                ;
-
 call_expr       : identifier LPAREN call_args RPAREN    { $$ = ast_new(N_CALL); ast_append_child_all($$, $1, $3); }
                 ;
 
 call_args       : /* empty */                           { $$ = ast_new(N_CALLARGS); }
                 | expr                                  { $$ = ast_new(N_CALLARGS); ast_append_child($$, $1); }
                 | call_args COMMA expr                  { ast_append_child($1, $3); }
+                ;
+
+assign_expr     : identifier ASSIGN expr                { $$ = ast_new(N_ASSIGNMENT); ast_append_child_all($$, $1, $3); }
+                ;
+
+identifier      : IDENTIFIER                    { $$ = ast_new(N_IDENTIFIER); $$->value = $1; }
                 ;
 
 boolean_op      : EQ    { $$ = ast_new(N_EQ); }
@@ -209,8 +212,6 @@ arithmetic_op   : ADD   { $$ = ast_new(N_ADD); }
                 | POW   { $$ = ast_new(N_POW); }
                 | MOD   { $$ = ast_new(N_MOD); }
                 ;
-
-identifier      : IDENTIFIER                    { $$ = ast_new(N_IDENTIFIER); $$->value = $1; }
 
 /* -- */
 
