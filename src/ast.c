@@ -26,7 +26,7 @@ ast_new(NodeClass c) {
 }
 
 Ast *
-ast_copy(const Ast *ast) {
+ast_clone(const Ast *ast) {
 	assert(ast != NULL);
 
 	Ast *cpy = ast_new(ast->class);
@@ -37,7 +37,7 @@ ast_copy(const Ast *ast) {
 		cpy->value = strdup(ast->value);
 
 	for(Ast *c = ast->child; c != NULL; c = c->next) {
-		Ast *ccpy = ast_copy(c);
+		Ast *ccpy = ast_clone(c);
 		ast_append_child(cpy, ccpy);
 	}
 
@@ -71,6 +71,9 @@ void _ast_append_child_all(Ast *ast, ...) {
 
 void ast_free(Ast *ast) {
 	assert(ast != NULL);
+
+	if(ast->value != NULL)
+		free(ast->value);
 
 	for(Ast *c = ast->child, *next = NULL; c != NULL; c = next) {
 		next = c->next;

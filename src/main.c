@@ -54,5 +54,13 @@ main() {
 
 	ast_execute(root);
 
+	Scope *scope, *free_ref;
+	for(scope = root->scope; scope != NULL; scope = free_ref) {
+		free_ref = scope->free_ref;
+		scope_free(scope);
+	}
+
+	ast_free(root);
+
 	return value;
 }

@@ -118,7 +118,7 @@ yyerror(YYLTYPE *llocp, Ast **ast, const char *yymsg) {
 
 %%
 
-program         : statements                    { $$ = $1; *ast = ast_copy($$); }
+program         : statements                    { $$ = $1; *ast = ast_clone($$); }
                 ;
 
 statements      : statement                     { $$ = ast_new(N_BLOCK); ast_append_child($$, $1); }
@@ -136,7 +136,7 @@ statement       : block
 block           : LBRACE statements RBRACE      { $$ = $2; }
                 ;
 
-declaration     : vardecl ASSIGN expr SEMICOLON         { $1->next = ast_new(N_ASSIGNMENT); ast_append_child_all($1->next, ast_copy($1->child->next), $3); }
+declaration     : vardecl ASSIGN expr SEMICOLON         { $1->next = ast_new(N_ASSIGNMENT); ast_append_child_all($1->next, ast_clone($1->child->next), $3); }
                 | vardecl SEMICOLON
                 | function
                 ;

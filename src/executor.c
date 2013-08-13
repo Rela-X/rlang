@@ -106,9 +106,13 @@ printf("executing "); pn(ast);
 	case N_STRING:
 	case N_SET:
 	case N_R:
-print_tree(stdout, ast); printf(" evaluates to ");
 		v = eval(ast);
-pv(v);
+print_tree(stdout, ast); printf(" evaluates to "); if(v != NULL) { pv(v); value_free(v); }
+		if(v != NULL) {
+//			value_free(v);
+		} else {
+			printf("v=null: "); pn(ast);
+		}
 		return;
 	}
 printf("EXECFAIL %d ", ast->class); pn(ast);
@@ -118,15 +122,15 @@ printf("EXECFAIL %d ", ast->class); pn(ast);
 static
 void
 block(const Ast *block) {
-	MemorySpace *new_memspace = memspace_new(current_memspace);
-	current_memspace = new_memspace;
+	MemorySpace *old_memspace = current_memspace;
+	current_memspace = memspace_new(current_memspace);
 
 	for(Ast *c = block->child; c != NULL && callstack_returnvalue == NULL; c = c->next) {
 		exec(c);
 	}
 
-	current_memspace = current_memspace->parent;
-	memspace_free(new_memspace);
+	memspace_free(current_memspace);
+	current_memspace = old_memspace;
 }
 
 static
@@ -620,10 +624,7 @@ _mod(const Ast *expr) {
 
 	switch(expr->eval_type) {
 	case T_INT:
-		value_set_int(rval, NATIVE_NUMBER(v1) % NATIVE_NUMBER(v2));
-		break;
-	case T_FLOAT:
-		value_set_float(rval, modf(NATIVE_NUMBER(v1), NATIVE_NUMBER(v2)));
+		value_set_int(rval, v1->as_int % v2->as_int);
 		break;
 	default:
 		pty(expr->eval_type);

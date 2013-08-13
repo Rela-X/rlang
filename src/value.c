@@ -42,24 +42,28 @@ value_copy(Value *dst, Value *src) {
 
 void
 value_set_bool(Value *v, bool nv) {
+	value_reset(v);
 	v->type = T_BOOL;
 	v->as_bool = nv;
 }
 
 void
 value_set_int(Value *v, int nv) {
+	value_reset(v);
 	v->type = T_INT;
 	v->as_int = nv;
 }
 
 void
 value_set_float(Value *v, double nv) {
+	value_reset(v);
 	v->type = T_FLOAT;
 	v->as_float = nv;
 }
 
 void
 value_set_string(Value *v, char *nv) {
+	value_reset(v);
 	v->type = T_STRING;
 	v->as_String = strdup(nv);
 }

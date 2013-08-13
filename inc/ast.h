@@ -38,7 +38,7 @@ struct _ast {
 };
 
 Ast *  ast_new(NodeClass type);
-Ast *  ast_copy(const Ast *ast);
+Ast *  ast_clone(const Ast *ast);
 
 void   ast_append_child(Ast *ast, Ast *child);
 #define ast_append_child_all(ast, ...) _ast_append_child_all(ast, __VA_ARGS__, NULL);

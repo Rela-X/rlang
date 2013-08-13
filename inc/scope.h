@@ -9,9 +9,11 @@ struct _scope {
         const Scope *parent;
         /** Symbol-table as a linked-list */
         Symbol *symbols;
+
+	Scope *free_ref;
 };
 
-Scope *         scope_new(const Scope *parent);
+Scope *         scope_new(Scope *parent);
 void            scope_define(Scope *scope, Symbol *symbol);
 Symbol *        scope_resolve(const Scope *scope, const char *name);
 Symbol *        scope_resolve_recursive(const Scope *scope, const char *name);

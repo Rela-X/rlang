@@ -45,7 +45,7 @@ walk_tree(Ast *ast) {
 		assert(ast->symbol != NULL);
 		break;
 	default:
-		for(Ast *c = ast->child; c != NULL; c = c->next) { 
+		for(Ast *c = ast->child; c != NULL; c = c->next) {
 			walk_tree(c);
 		}
 	}
@@ -78,7 +78,7 @@ annotate_return_stmts(Ast *ast, Symbol *sy) {
 		ast->symbol = sy;
 		break;
 	default:
-		for(Ast *c = ast->child; c != NULL; c = c->next) { 
+		for(Ast *c = ast->child; c != NULL; c = c->next) {
 			annotate_return_stmts(c, sy);
 		}
 	}

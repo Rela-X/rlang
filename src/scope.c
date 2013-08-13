@@ -5,11 +5,18 @@
 #include "scope.h"
 
 Scope *
-scope_new(const Scope *p) {
+scope_new(Scope *p) {
 	Scope *m = malloc(sizeof(*m));
 	assert(m != NULL);
 	m->parent = p;
 	m->symbols = NULL;
+
+	if(p != NULL) {
+		m->free_ref = p->free_ref;
+		p->free_ref = m;
+	} else {
+		m->free_ref = NULL;
+	}
 
 	return m;
 }

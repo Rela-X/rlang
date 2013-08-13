@@ -54,6 +54,6 @@ mem_new(Symbol *symbol) {
 
 void
 mem_free(Memory *mem) {
-	free(mem->value);
+	value_free(mem->value);
 	free(mem);
 }
