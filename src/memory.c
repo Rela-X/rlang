@@ -46,7 +46,7 @@ mem_new(Symbol *symbol) {
 	Memory *m = malloc(sizeof(*m));
 	assert(m != NULL);
 	m->symbol = symbol;
-//	m->value = ;
+	m->value = value_new();
 	m->next = NULL;
 
 	return m;
@@ -54,5 +54,6 @@ mem_new(Symbol *symbol) {
 
 void
 mem_free(Memory *mem) {
+	free(mem->value);
 	free(mem);
 }

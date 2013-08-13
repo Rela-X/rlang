@@ -4,23 +4,12 @@
 #include <stdbool.h>
 
 #include "symbol.h"
-
-union _value {
-	bool as_bool;
-	int as_int;
-	float as_float;
-	char *as_str;
-	/*
-	rf_Set *as_Set;
-	rf_Relation *as_R;
-	*/
-};
-typedef union _value Value;
+#include "value.h"
 
 typedef struct _memory Memory;
 struct _memory {
 	Symbol          *symbol;
-	Value           value;
+	Value           *value;
 
 	Memory          *next;
 };

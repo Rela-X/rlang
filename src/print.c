@@ -16,6 +16,7 @@ static char *node_name_table[] = {
 	[N_RETURN] = "return",
 	[N_NOT] = "!", 
 	[N_EQ] = "==", 
+	[N_NEQ] = "!=",
 	[N_AND] = "&&", 
 	[N_IOR] = "||", 
 	[N_XOR] = "!=", 
@@ -151,4 +152,38 @@ print_type(FILE *f, const Type type) {
 	assert(type < NTYPES);
 
 	fprintf(f, " => %s", type_name_table[type]);
+}
+
+void
+print_value(FILE *f, const Value *value) {
+	assert(value != NULL);
+
+	fprintf(f, "<");
+
+	if(value->type > 0 && value->type < NTYPES) {
+		fprintf(f, "%s", type_name_table[value->type]);
+	} else if(value->type == T_VOID ){
+		fprintf(f, ">");
+		return;
+	} else {
+		fprintf(f, "%d", value->type);
+	}
+
+	fprintf(f, ":");
+
+	switch(value->type) {
+	case T_BOOL:
+		fprintf(f, "%s", (value->as_bool) ? "true" : "false");
+		break;
+	case T_INT:
+		fprintf(f, "%d", value->as_int);
+		break;
+	case T_FLOAT:
+		fprintf(f, "%f", value->as_float);
+		break;
+	default:
+		fprintf(f, "%s:%d:%s TODO ", __FILE__, __LINE__, __func__);
+		print_type(f, value->type);
+	}
+	fprintf(f, ">");
 }
