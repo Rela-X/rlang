@@ -258,23 +258,25 @@ call(const Ast *expr) {
 	while(global_memspace->parent != NULL)
 		global_memspace = global_memspace->parent;
 
-	MemorySpace *old_memspace = current_memspace;
-	current_memspace = memspace_new(global_memspace);
+	MemorySpace *fn_memspace = memspace_new(global_memspace);
 
 	Ast *carg = cargs->child;
 	Symbol *farg = id->symbol->args->symbols;
 	for(; carg != NULL && farg != NULL; carg = carg->next, farg = farg->next) {
 		Memory *m = mem_new(farg);
 		m->value = eval(carg);
-		memspace_store(current_memspace, m);
+		memspace_store(fn_memspace, m);
 	}
-	exec(id->symbol->code);
+	MemorySpace *old_memspace = current_memspace;
+	current_memspace = fn_memspace;
 
-	rval = callstack_returnvalue;
-	callstack_returnvalue = NULL;
+	exec(id->symbol->code);
 
 	memspace_free(current_memspace);
 	current_memspace = old_memspace;
+
+	rval = callstack_returnvalue;
+	callstack_returnvalue = NULL;
 
 	return rval;
 }
