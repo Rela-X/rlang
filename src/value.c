@@ -8,7 +8,7 @@ static void value_reset(Value *);
 Value *
 value_new() {
 	Value *m = malloc(sizeof(*m));
-	m->type = T_NONE;
+	value_reset(m);
 
 	return m;
 }
@@ -38,6 +38,12 @@ value_copy(Value *dst, Value *src) {
 		break;
 	}
 	dst->type = src->type;
+}
+
+void
+value_set_void(Value *v) {
+	value_reset(v);
+	v->type = T_VOID;
 }
 
 void

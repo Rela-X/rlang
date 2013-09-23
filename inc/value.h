@@ -27,6 +27,7 @@ void value_copy(Value *dst, Value *src);
 	char * : value_set_string \
 	) (v, nv)
 
+void value_set_void(Value *);
 void value_set_bool(Value *, bool);
 void value_set_int(Value *, int);
 void value_set_float(Value *, double);
