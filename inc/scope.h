@@ -10,7 +10,7 @@ struct _scope {
         /** Symbol-table as a linked-list */
         Symbol *symbols;
 
-	Scope *free_ref;
+        Scope *free_ref;
 };
 
 Scope *         scope_new(Scope *parent);
