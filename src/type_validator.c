@@ -8,6 +8,7 @@
 
 static void validate_tree(const Ast *ast);
 static void validate_ifstatement(const Ast *);
+static void validate_whilestatement(const Ast *);
 static void validate_assignment(const Ast *);
 static void validate_call(const Ast *);
 static void validate_return(const Ast *);
@@ -46,6 +47,9 @@ validate_tree(const Ast *ast) {
 	case N_IF:
 		validate_ifstatement(ast);
 		break;
+	case N_WHILE:
+		validate_whilestatement(ast);
+		break;
 	case N_RETURN:
 		validate_return(ast);
 		break;
@@ -68,6 +72,15 @@ validate_ifstatement(const Ast *if_stmt) {
 	Ast *cond_expr = if_stmt->child;
 //	Ast *then_stmt = if_stmt->child->next;
 //	Ast *else_stmt = if_stmt->child->next->next;
+
+	expr_check_type(cond_expr, T_BOOL);
+}
+
+static
+void
+validate_whilestatement(const Ast *while_stmt) {
+	Ast *cond_expr = while_stmt->child;
+//	Ast *loop_body = while_stmt->child->next;
 
 	expr_check_type(cond_expr, T_BOOL);
 }
