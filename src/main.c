@@ -20,7 +20,7 @@ init_builtin_scope(Scope *builtin_scope) {
 #define def_type(name, type) do {               \
 	Symbol *sy = symbol_new(S_TYPE, name);  \
 	sy->eval_type = type;                   \
-	scope_define(builtin_scope, sy);         \
+	scope_define(builtin_scope, sy);        \
 	} while(0)
 
 	def_type("void", T_VOID);
@@ -30,6 +30,7 @@ init_builtin_scope(Scope *builtin_scope) {
 	def_type("String", T_STRING);
 	def_type("Set", T_SET);
 	def_type("R", T_R);
+#undef def_type
 }
 
 int

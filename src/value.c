@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <string.h>
 #include <assert.h>
 
 #include "value.h"
@@ -8,6 +9,7 @@ static void value_reset(Value *);
 Value *
 value_new() {
 	Value *m = malloc(sizeof(*m));
+	m->type = T_NONE;
 	value_reset(m);
 
 	return m;
@@ -35,6 +37,12 @@ value_copy(Value *dst, Value *src) {
 		break;
 	case T_STRING:
 		dst->as_String = strdup(src->as_String);
+		break;
+	case T_SET:
+		dst->as_Set = rf_set_clone(src->as_Set);
+		break;
+	case T_R:
+		dst->as_Relation = rf_relation_clone(src->as_Relation);
 		break;
 	}
 	dst->type = src->type;
@@ -71,7 +79,21 @@ void
 value_set_string(Value *v, char *nv) {
 	value_reset(v);
 	v->type = T_STRING;
-	v->as_String = strdup(nv);
+	v->as_String = nv;
+}
+
+void
+value_set_set(Value *v, rf_Set *nv) {
+	value_reset(v);
+	v->type = T_SET;
+	v->as_Set = nv;
+}
+
+void
+value_set_relation(Value *v, rf_Relation *nv) {
+	value_reset(v);
+	v->type = T_R;
+	v->as_Relation = nv;
 }
 
 static
@@ -86,6 +108,12 @@ value_reset(Value *v) {
 		break;
 	case T_STRING:
 		free(v->as_String);
+		break;
+	case T_SET:
+		rf_set_free(v->as_Set);
+		break;
+	case T_R:
+		rf_relation_free(v->as_Relation);
 		break;
 	}
 	v->type = T_NONE;

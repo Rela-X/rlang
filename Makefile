@@ -10,7 +10,7 @@ CFLAGS  += -D_POSIX_C_SOURCE=200809L
 INC     += -I ./
 INC     += -I inc/
 
-LIB     += -lm
+LIB     += -lm -lrelafix
 
 TREE_WALKER_OBJ = scope_annotator.o symbol_annotator.o type_annotator.o type_validator.o executor.o
 OBJ = main.o ast.o rlang.yy.o rlang.tab.o memory.o print.o scope.o symbol.o value.o $(TREE_WALKER_OBJ)
@@ -26,7 +26,7 @@ TARGET = rlang
 all: $(TARGET)
 
 $(TARGET) : $(OBJ)
-	$(CC) $(CFLAGS) -o $(TARGET) $(LIBPATH) $(LIB) $^
+	$(CC) $(CFLAGS) -o $(TARGET) $^ $(LIBPATH) $(LIB)
 
 clean:
 	rm -f $(OBJ) $(TARGET)

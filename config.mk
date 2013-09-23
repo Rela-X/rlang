@@ -4,3 +4,6 @@ MAKE    = make
 LEX     = flex
 YACC    = bison --yacc
 YFLAGS  = -d -t
+
+INC     = -I ../relafix/inc/
+LIBPATH = -L ../relafix/

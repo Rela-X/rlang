@@ -238,10 +238,10 @@ eval(const Ast *expr) {
 		return _float(expr);
 	case N_STRING:
 		return _string(expr);
-	/*
 	case N_SET:
+		return _set(expr);
 	case N_R:
-	*/
+		return _relation(expr);
 	}
 printf("EVALFAIL %d ", expr->class); pn(expr);
 	assert(false && "should not be reached");
@@ -676,15 +676,28 @@ _float(const Ast *expr) {
 static
 Value *
 _string(const Ast *expr) {
+	Value *rval = value_new();
+	value_set_string(rval, strdup(expr->value));
+
+	return rval;
 }
 
 static
 Value *
 _set(const Ast *expr) {
+	Value *rval = value_new();
+	value_set_set(rval, NULL);
+	assert(false);
+
+	return rval;
 }
 
 static
 Value *
 _relation(const Ast *expr) {
-}
+	Value *rval = value_new();
+	value_set_relation(rval, NULL);
+	assert(false);
 
+	return rval;
+}
