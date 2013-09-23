@@ -24,12 +24,12 @@ static Type op_type(const Type type_table[NTYPES][NTYPES], const Ast *, const As
 static const Type equality_result_type_table[NTYPES][NTYPES] = {
                        /* void */  /* boolean */ /* integer */ /* float */ /* String */ /* Set */ /* R */
         [T_VOID]   = { T_VOID,     T_VOID,       T_VOID,       T_VOID,     T_VOID,      T_VOID,   T_VOID },
-        [T_BOOL]   = { T_VOID,     T_BOOL,       T_VOID,       T_VOID,     T_VOID,      T_VOID,   T_VOID },
-        [T_INT]    = { T_VOID,     T_VOID,       T_BOOL,       T_BOOL,     T_VOID,      T_VOID,   T_VOID },
-        [T_FLOAT]  = { T_VOID,     T_VOID,       T_BOOL,       T_BOOL,     T_VOID,      T_VOID,   T_VOID },
-        [T_STRING] = { T_VOID,     T_VOID,       T_VOID,       T_VOID,     T_BOOL,      T_VOID,   T_VOID },
-        [T_SET]    = { T_VOID,     T_VOID,       T_VOID,       T_VOID,     T_VOID,      T_BOOL,   T_VOID },
-        [T_R]      = { T_VOID,     T_VOID,       T_VOID,       T_VOID,     T_VOID,      T_VOID,   T_BOOL },
+        [T_BOOL]   = { T_VOID,     T_BOOL,       T_BOOL,       T_BOOL,     T_BOOL,      T_BOOL,   T_BOOL },
+        [T_INT]    = { T_VOID,     T_BOOL,       T_BOOL,       T_BOOL,     T_BOOL,      T_BOOL,   T_BOOL },
+        [T_FLOAT]  = { T_VOID,     T_BOOL,       T_BOOL,       T_BOOL,     T_BOOL,      T_BOOL,   T_BOOL },
+        [T_STRING] = { T_VOID,     T_BOOL,       T_BOOL,       T_BOOL,     T_BOOL,      T_BOOL,   T_BOOL },
+        [T_SET]    = { T_VOID,     T_BOOL,       T_BOOL,       T_BOOL,     T_BOOL,      T_BOOL,   T_BOOL },
+        [T_R]      = { T_VOID,     T_BOOL,       T_BOOL,       T_BOOL,     T_BOOL,      T_BOOL,   T_BOOL },
 };
 
 static const Type boolean_result_type_table[NTYPES][NTYPES] = {
