@@ -183,7 +183,7 @@ void
 returnstat(const Ast *return_stmt) {
 	Ast *expr = return_stmt->child;
 
-	callstack_returnvalue = eval(expr);
+	callstack_returnvalue = (expr != NULL) ? eval(expr) : value_new();
 }
 
 static
