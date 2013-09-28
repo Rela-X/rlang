@@ -163,7 +163,7 @@ print_value(FILE *f, const Value *value) {
 	if(value->type > 0 && value->type < NTYPES) {
 		fprintf(f, "%s", type_name_table[value->type]);
 	} else if(value->type == T_VOID ){
-		fprintf(f, ">");
+		fprintf(f, "void>");
 		return;
 	} else {
 		fprintf(f, "%d", value->type);
@@ -180,6 +180,9 @@ print_value(FILE *f, const Value *value) {
 		break;
 	case T_FLOAT:
 		fprintf(f, "%f", value->as_float);
+		break;
+	case T_STRING:
+		fprintf(f, "%s", value->as_String);
 		break;
 	default:
 		fprintf(f, "%s:%d:%s TODO ", __FILE__, __LINE__, __func__);

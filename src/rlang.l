@@ -38,9 +38,10 @@ ucn  		((\\u([[:xdigit:]]{4}))|(\\U([[:xdigit:]]{8})))
 nondigit	[_[:alpha:]]
 c99_id		([_[:alpha:]]|{ucn})([_[:alnum:]]|{ucn})*
 
+%x STR
+
 %x COMMENT
 %x BLOCKCOMMENT
-
 %%
 
 [ \t\r\n]+	{ }
@@ -90,6 +91,10 @@ c99_id		([_[:alpha:]]|{ucn})([_[:alnum:]]|{ucn})*
 {c99_floating_point}	{ VALUE(FLOAT); }
 {c99_id}		{ VALUE(IDENTIFIER); }
 
+["]		{ BEGIN(STR); }
+<STR>[^"]*	{ VALUE(STRING); }
+<STR>["]	{ BEGIN(INITIAL); }
+
 .		{ printf("UNHANDLED TOKEN \"%s\"\n", yytext); }
 
 "//"		{ BEGIN(COMMENT); }
@@ -98,6 +103,5 @@ c99_id		([_[:alpha:]]|{ucn})([_[:alnum:]]|{ucn})*
 "/*"			{ BEGIN(BLOCKCOMMENT); }
 <BLOCKCOMMENT>"*/"	{ BEGIN(INITIAL); }
 <BLOCKCOMMENT>.		{ }
-
 %%
 

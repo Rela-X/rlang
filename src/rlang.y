@@ -2,6 +2,7 @@
 #include <stdio.h>
 
 #include "ast.h"
+#include "print.h"
 
 #define YYERROR_VERBOSE 1
 #define YYDEBUG 1
