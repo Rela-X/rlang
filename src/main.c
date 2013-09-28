@@ -1,6 +1,7 @@
 #include <stdlib.h>
 
 #include "ast.h"
+#include "builtins.h"
 #include "print.h"
 #include "scope.h"
 #include "symbol.h"
@@ -16,7 +17,7 @@ extern void ast_execute(Ast *);
 
 static
 void
-init_builtin_scope(Scope *builtin_scope) {
+init_builtin_types(Scope *builtin_scope) {
 #define def_type(name, type) do {               \
 	Symbol *sy = symbol_new(S_TYPE, name);  \
 	sy->eval_type = type;                   \
@@ -44,7 +45,8 @@ main() {
 	pt(root);
 
 	root->scope = scope_new(NULL);
-	init_builtin_scope(root->scope);
+	init_builtin_types(root->scope);
+	init_builtin_functions(root->scope);
 
 	ast_annotate_scopes(root);
 
@@ -55,12 +57,7 @@ main() {
 
 	ast_execute(root);
 
-	Scope *scope, *free_ref;
-	for(scope = root->scope; scope != NULL; scope = free_ref) {
-		free_ref = scope->free_ref;
-		scope_free(scope);
-	}
-
+	ast_cleanup(root);
 	ast_free(root);
 
 	return value;

@@ -4,6 +4,8 @@
 
 #include "symbol.h"
 
+#include "scope.h"
+
 Symbol *
 symbol_new(SymbolClass class, const char *name) {
 	Symbol *m = malloc(sizeof(*m));

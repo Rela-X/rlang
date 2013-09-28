@@ -11,13 +11,6 @@ scope_new(Scope *p) {
 	m->parent = p;
 	m->symbols = NULL;
 
-	if(p != NULL) {
-		m->free_ref = p->free_ref;
-		p->free_ref = m;
-	} else {
-		m->free_ref = NULL;
-	}
-
 	return m;
 }
 
@@ -78,4 +71,5 @@ scope_free(Scope *scope) {
 		next = sy->next;
 		symbol_free(sy);
 	}
+	free(scope);
 }

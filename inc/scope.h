@@ -9,8 +9,6 @@ struct _scope {
         const Scope *parent;
         /** Symbol-table as a linked-list */
         Symbol *symbols;
-
-        Scope *free_ref;
 };
 
 Scope *         scope_new(Scope *parent);

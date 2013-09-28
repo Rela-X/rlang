@@ -112,6 +112,7 @@ print_tree(stdout, ast); printf(" evaluates to "); if(v != NULL) { pv(v); value_
 //			value_free(v);
 		} else {
 			printf("v=null: "); pn(ast);
+			assert(false);
 		}
 		return;
 	}
@@ -122,15 +123,17 @@ printf("EXECFAIL %d ", ast->class); pn(ast);
 static
 void
 block(const Ast *block) {
-	MemorySpace *old_memspace = current_memspace;
-	current_memspace = memspace_new(current_memspace);
+	MemorySpace *local_memspace = memspace_new(current_memspace);
+
+	current_memspace = local_memspace;
 
 	for(Ast *c = block->child; c != NULL && callstack_returnvalue == NULL; c = c->next) {
 		exec(c);
 	}
 
-	memspace_free(current_memspace);
-	current_memspace = old_memspace;
+	current_memspace = local_memspace->parent;
+
+	memspace_free(local_memspace);
 }
 
 static
@@ -267,16 +270,33 @@ call(const Ast *expr) {
 		m->value = eval(carg);
 		memspace_store(fn_memspace, m);
 	}
-	MemorySpace *old_memspace = current_memspace;
-	current_memspace = fn_memspace;
 
-	exec(id->symbol->code);
+	switch(id->symbol->class) {
+	case S_FUNCTION: {
+		MemorySpace *local_memspace = current_memspace;
 
-	memspace_free(current_memspace);
-	current_memspace = old_memspace;
+		current_memspace = fn_memspace;
 
-	rval = callstack_returnvalue;
-	callstack_returnvalue = NULL;
+		exec(id->symbol->code);
+
+		current_memspace = local_memspace;
+		}; break;
+	case S_BUILTIN: {
+		callstack_returnvalue = id->symbol->fn(id->symbol->args, fn_memspace);
+		}; break;
+	default:
+		assert(false);
+	}
+
+	memspace_free(fn_memspace);
+
+	if(callstack_returnvalue != NULL) {
+		rval = callstack_returnvalue;
+		callstack_returnvalue = NULL;
+	} else {
+		rval = value_new();
+		value_set_void(rval);
+	}
 
 	return rval;
 }

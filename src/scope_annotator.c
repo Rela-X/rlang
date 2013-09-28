@@ -66,9 +66,9 @@ function(Ast *fn) {
 	while(global_scope->parent != builtin_scope)
 		global_scope = global_scope->parent;
 
-	Scope *s = scope_new(global_scope);
-	args->scope = s;
-	block->scope = s;
+	Scope *parameter_scope = scope_new(global_scope);
+	args->scope = parameter_scope;
+	block->scope = parameter_scope;
 
 	annotate_tree(args);
 	annotate_tree(block);
