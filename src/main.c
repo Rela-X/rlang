@@ -41,8 +41,15 @@ main() {
 	Ast *root;
 	int value;
 	value = yyparse(&root);
+	if(value != 0) {
+		goto cleanup_ast;
+	}
 
+	printf("### AST:\n\n");
 	pt(root);
+	printf("\n");
+
+	printf("### Log:\n\n");
 
 	root->scope = scope_new(NULL);
 	init_builtin_types(root->scope);
@@ -57,7 +64,9 @@ main() {
 
 	ast_execute(root);
 
+cleanup_ast_meta:
 	ast_cleanup(root);
+cleanup_ast:
 	ast_free(root);
 
 	return value;

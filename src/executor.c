@@ -706,8 +706,7 @@ static
 Value *
 _set(const Ast *expr) {
 	Value *rval = value_new();
-	value_set_set(rval, NULL);
-	assert(false);
+	value_set_set(rval, rf_set_from_string(expr->value));
 
 	return rval;
 }
@@ -716,8 +715,7 @@ static
 Value *
 _relation(const Ast *expr) {
 	Value *rval = value_new();
-	value_set_relation(rval, NULL);
-	assert(false);
+	value_set_relation(rval, rf_relation_from_string(expr->value));
 
 	return rval;
 }
