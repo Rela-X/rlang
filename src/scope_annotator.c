@@ -4,18 +4,20 @@
 
 #include "ast.h"
 #include "scope.h"
+#include "print.h"
 
 static void annotate_tree(Ast *);
 static void block(Ast *);
 static void function(Ast *);
 
-static const *builtin_scope;
+static const *root_scope;
 
 void
-ast_annotate_scopes(Ast *ast) {
+ast_annotate_scopes(Ast *ast, Scope *builtin_scope) {
 	printf("setting scope annotations\n");
 
-	builtin_scope = ast->scope;
+	ast->scope = builtin_scope;
+	root_scope = builtin_scope;
 
 	annotate_tree(ast);
 }
@@ -43,10 +45,10 @@ annotate_tree(Ast *ast) {
 static
 void
 block(Ast *block) {
-	Scope *s = scope_new(block->scope);
+	block->scope = scope_new(block->scope);
 
 	for(Ast *c = block->child; c != NULL; c = c->next) {
-		c->scope = s;
+		c->scope = block->scope;
 		annotate_tree(c);
 	}
 }
@@ -63,7 +65,7 @@ function(Ast *fn) {
 	id->scope = fn->scope;
 
 	Scope *global_scope = fn->scope;
-	while(global_scope->parent != builtin_scope)
+	while(global_scope->parent != root_scope)
 		global_scope = global_scope->parent;
 
 	Scope *parameter_scope = scope_new(global_scope);

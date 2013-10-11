@@ -9,7 +9,7 @@
 extern int yyparse(Ast **ast);
 extern int yydebug;
 
-extern void ast_annotate_scopes(Ast *);
+extern void ast_annotate_scopes(Ast *, Scope *);
 extern void ast_annotate_symbols(Ast *);
 extern void ast_annotate_types(Ast *);
 extern void ast_validate_types(Ast *);
@@ -51,11 +51,11 @@ main() {
 
 	printf("### Log:\n\n");
 
-	root->scope = scope_new(NULL);
-	init_builtin_types(root->scope);
-	init_builtin_functions(root->scope);
+	Scope *builtin_scope = scope_new(NULL);
+	init_builtin_types(builtin_scope);
+	init_builtin_functions(builtin_scope);
 
-	ast_annotate_scopes(root);
+	ast_annotate_scopes(root, builtin_scope);
 
 	ast_annotate_symbols(root);
 
@@ -66,6 +66,7 @@ main() {
 
 cleanup_ast_meta:
 	ast_cleanup(root);
+	scope_free(builtin_scope);
 cleanup_ast:
 	ast_free(root);
 
