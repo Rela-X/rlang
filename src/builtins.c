@@ -118,6 +118,20 @@ builtin_r2str(Scope *args, MemorySpace *memspace) {
 
 static
 Value *
+builtin_set_is_subset(Scope *args, MemorySpace *memspace) {
+	Value *arg[] = {
+		get_value_by_name(args, memspace, "0"),
+		get_value_by_name(args, memspace, "1"),
+	};
+	Value *rval = value_new();
+
+	value_set_bool(rval, rf_set_is_subset(arg[0]->as_Set, arg[1]->as_Set));
+
+	return rval;
+}
+
+static
+Value *
 builtin_relation_is_homogeneous(Scope *args, MemorySpace *memspace) {
 	Value *v = get_value_by_name(args, memspace, "0");
 	Value *rval = value_new();
@@ -187,6 +201,8 @@ init_builtin_functions(Scope *builtin_scope) {
 	def_function(T_STRING, "float2str", &builtin_float2str, T_FLOAT);
 	def_function(T_STRING, "set2str", &builtin_set2str, T_SET);
 	def_function(T_STRING, "r2str", &builtin_r2str, T_R);
+
+	def_function(T_BOOL, "set_is_subset", &builtin_set_is_subset, T_SET, T_SET);
 
 	def_function(T_BOOL, "relation_is_homogeneous", &builtin_relation_is_homogeneous, T_R);
 	def_function(T_BOOL, "relation_is_reflexive", &builtin_relation_is_reflexive, T_R);

@@ -56,6 +56,15 @@ void print_node(FILE *f, const Ast *ast) {
 	case N_STRING:
 		fprintf(f, "%s", ast->value);
 		break;
+	case N_SET:
+		fprintf(f, "{");
+		for(Ast *c = ast->child; c != NULL; c = c->next) {
+			fprintf(f, " ");
+			print_node(f, c);
+		}
+		fprintf(f, " ");
+		fprintf(f, "}");
+		break;
 	default:
 		if(ast->class >= len(node_name_table)) {
 			fprintf(f, "%s:%d:%s TODO %d", __FILE__, __LINE__, __func__, ast->class);
@@ -101,11 +110,13 @@ print_tree(FILE *f, const Ast *ast) {
 	assert(ast != NULL);
 
 	switch(ast->class) {
+	case N_IDENTIFIER:
 	case N_BOOLEAN:
 	case N_INTEGER:
 	case N_FLOAT:
 	case N_STRING:
-	case N_IDENTIFIER:
+	case N_SET:
+	case N_R:
 		print_node(f, ast);
 		return; // no children
 	default:
@@ -185,6 +196,16 @@ print_value(FILE *f, const Value *value) {
 	case T_STRING:
 		fprintf(f, "%s", value->as_String);
 		break;
+	case T_SET: {
+		char *str = rf_set_to_string(value->as_Set);
+		fprintf(f, "%s", str);
+		free(str);
+		} break;
+	case T_R: {
+		char *str = rf_relation_to_string(value->as_Relation);
+		fprintf(f, "%s", str);
+		free(str);
+		} break;
 	default:
 		fprintf(f, "%s:%d:%s TODO ", __FILE__, __LINE__, __func__);
 		print_type(f, value->type);

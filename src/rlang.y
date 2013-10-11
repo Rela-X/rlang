@@ -39,9 +39,11 @@ yyerror(YYLTYPE *llocp, Ast **ast, const char *yymsg) {
 %type  <node>  vardecl function function_args
 %type  <node>  expr assign_expr call_expr call_args
 %type  <node>  boolean_op arithmetic_comp arithmetic_op
-%type  <node>  identifier
+%type  <node>  identifier value
+%type  <node>  set set_elements set_element
 
-%token <value> BOOLEAN INTEGER FLOAT STRING IDENTIFIER
+%token <value> IDENTIFIER
+%token <value> BOOLEAN INTEGER FLOAT STRING
 
 %token ASSIGN
 %token IF ELSE
@@ -123,10 +125,8 @@ expr            : LPAREN expr RPAREN            { $$ = $2; }
                 | expr boolean_op expr          { $$ = $2; ast_append_child_all($$, $1, $3); }
                 | expr arithmetic_comp expr     { $$ = $2; ast_append_child_all($$, $1, $3); }
                 | expr arithmetic_op expr       { $$ = $2; ast_append_child_all($$, $1, $3); }
-                | BOOLEAN                       { $$ = ast_new(N_BOOLEAN); $$->value = $1; }
-                | INTEGER                       { $$ = ast_new(N_INTEGER); $$->value = $1; }
-                | FLOAT                         { $$ = ast_new(N_FLOAT); $$->value = $1; }
-                | STRING                        { $$ = ast_new(N_STRING); $$->value = $1; }
+                | value
+                | set
 /*
                 | INC identifier
                 | DEC identifier
@@ -168,27 +168,22 @@ arithmetic_op   : ADD   { $$ = ast_new(N_ADD); }
                 | MOD   { $$ = ast_new(N_MOD); }
                 ;
 
-/* -- */
+value           : BOOLEAN                       { $$ = ast_new(N_BOOLEAN); $$->value = $1; }
+                | INTEGER                       { $$ = ast_new(N_INTEGER); $$->value = $1; }
+                | FLOAT                         { $$ = ast_new(N_FLOAT); $$->value = $1; }
+                | STRING                        { $$ = ast_new(N_STRING); $$->value = $1; }
+                ;
 
-//relation        : domain 'x' domain '=' table            // { printf("Relation(%s, %s, %s)\n", $1, $3, $5); }
-//                ;
-//domain          : '{' domainElements '}'                 // { printf("Domain(%s)\n", $2); }
-//                ;
-//domainElements  : /* empty */
-//                | domainElement domainElements
-//                ;
-//domainElement   : domain /* domains can be nested */
-//                | identifier   /* [a-z] */
-//                ;
-//table           : '{' tableRows '}'                      // { printf("Table(%s)\n", $2); }
-//                ;
-//tableRows       : tableRow
-//                | tableRow '|' '|' tableRows
-//                ;
-//tableRow        : binBool /* [01 ]* (can be empty)*/
-//                ;
-//
-//binBool         :;
+set             : LBRACE set_elements RBRACE    { $$ = $2; }
+                ;
 
+set_elements    : /* empty */                   { $$ = ast_new(N_SET); }
+                | set_element                   { $$ = ast_new(N_SET); ast_append_child($$, $1); }
+                | set_elements set_element      { ast_append_child($1, $2); }
+                ;
+
+set_element     : value                         { $1->class = N_STRING; }
+                | identifier                    { $1->class = N_STRING; }
+                | set
+                ;
 %%
-

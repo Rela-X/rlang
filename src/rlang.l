@@ -1,5 +1,6 @@
-%option noyywrap
 %option bison-bridge
+%option noyywrap
+%option stack
 
 %{
 #include <stdbool.h>
@@ -39,6 +40,7 @@ nondigit	[_[:alpha:]]
 c99_id		([_[:alpha:]]|{ucn})([_[:alnum:]]|{ucn})*
 
 %x STR
+%x SET
 
 %x COMMENT
 %x BLOCKCOMMENT
@@ -91,17 +93,25 @@ c99_id		([_[:alpha:]]|{ucn})([_[:alnum:]]|{ucn})*
 {c99_floating_point}	{ VALUE(FLOAT); }
 {c99_id}		{ VALUE(IDENTIFIER); }
 
-["]		{ BEGIN(STR); }
-<STR>[^"]*	{ VALUE(STRING); }
-<STR>["]	{ BEGIN(INITIAL); }
+<INITIAL>["]		{ yy_push_state(STR); }
+<STR>{
+	[^"]*		{ VALUE(STRING); }
+	["]		{ yy_pop_state(); }
+}
 
-.		{ printf("UNHANDLED TOKEN \"%s\"\n", yytext); }
+<INITIAL>"//"		{ yy_push_state(COMMENT); }
+<COMMENT>{
+	.		{ }
+	\n		{ yy_pop_state(); }
+}
 
-"//"		{ BEGIN(COMMENT); }
-<COMMENT>\n	{ BEGIN(INITIAL); }
-<COMMENT>.	{ }
-"/*"			{ BEGIN(BLOCKCOMMENT); }
-<BLOCKCOMMENT>"*/"	{ BEGIN(INITIAL); }
-<BLOCKCOMMENT>.		{ }
+<*>"/*"			{ yy_push_state(BLOCKCOMMENT); }
+<BLOCKCOMMENT>{
+	.		{ }
+	"*/"		{ yy_pop_state(); }
+}
+
+.	{ printf("UNHANDLED TOKEN \"%s\"\n", yytext); }
+
 %%
 

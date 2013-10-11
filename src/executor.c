@@ -14,7 +14,6 @@ static void block(const Ast *);
 static void ifstat(const Ast *);
 static void whilestat(const Ast *);
 static void declaration(const Ast *);
-static void function(const Ast *);
 static void returnstat(const Ast *);
 
 static Value * eval(const Ast *);
@@ -59,7 +58,7 @@ ast_execute(const Ast *ast) {
 static
 void
 exec(const Ast *ast) {
-printf("executing "); pn(ast);
+//printf("executing "); pn(ast);
 	Value *v;
 	switch(ast->class) {
 	case N_BLOCK:
@@ -73,9 +72,6 @@ printf("executing "); pn(ast);
 		return;
 	case N_DECLARATION:
 		declaration(ast);
-		return;
-	case N_FUNCTION:
-		function(ast);
 		return;
 	case N_RETURN:
 		returnstat(ast);
@@ -107,13 +103,8 @@ printf("executing "); pn(ast);
 	case N_SET:
 	case N_R:
 		v = eval(ast);
-print_tree(stdout, ast); printf(" evaluates to "); if(v != NULL) { pv(v); value_free(v); }
-		if(v != NULL) {
-//			value_free(v);
-		} else {
-			printf("v=null: "); pn(ast);
-			assert(false);
-		}
+do { print_tree(stdout, ast); printf(" evaluates to "); pv(v); } while(0);
+		value_free(v);
 		return;
 	}
 printf("EXECFAIL %d ", ast->class); pn(ast);
@@ -173,12 +164,6 @@ declaration(const Ast *declaration) {
 
 	Memory *m = mem_new(id->symbol);
 	memspace_store(current_memspace, m);
-}
-
-static
-void
-function(const Ast *function) {
-	// TODO
 }
 
 static
@@ -706,7 +691,28 @@ static
 Value *
 _set(const Ast *expr) {
 	Value *rval = value_new();
-	value_set_set(rval, rf_set_from_string(expr->value));
+
+	int n = 0;
+	for(Ast *c = expr->child; c != NULL; c = c->next)
+		n++;
+
+	int eidx = -1;
+	rf_SetElement *elems[n];
+	for(Ast *c = expr->child; c != NULL; c = c->next) {
+		Value *v;
+		switch(c->class) {
+		case N_STRING:
+			elems[++eidx] = rf_set_element_new_string(c->value);
+			break;
+		case N_SET:
+			v = _set(c);
+			elems[++eidx] = rf_set_element_new_set(v->as_Set);
+			value_free(v);
+			break;
+		}
+	}
+
+	value_set_set(rval, rf_set_new(n, elems));
 
 	return rval;
 }
