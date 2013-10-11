@@ -4,6 +4,7 @@
 #include <stdarg.h>
 
 #include "ast.h"
+#include "utils.h"
 
 Ast *
 ast_new(NodeClass c) {

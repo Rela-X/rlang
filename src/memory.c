@@ -2,6 +2,7 @@
 #include <assert.h>
 
 #include "memory.h"
+#include "utils.h"
 
 MemorySpace *
 memspace_new(MemorySpace *parent) {
@@ -46,7 +47,7 @@ mem_new(Symbol *symbol) {
 	Memory *m = malloc(sizeof(*m));
 	assert(m != NULL);
 	m->symbol = symbol;
-	m->value = value_new();
+	m->value = NULL;
 	m->next = NULL;
 
 	return m;
@@ -54,6 +55,9 @@ mem_new(Symbol *symbol) {
 
 void
 mem_free(Memory *mem) {
+	assert(mem != NULL);
+	assert(mem->value != NULL);
+
 	value_free(mem->value);
 	free(mem);
 }

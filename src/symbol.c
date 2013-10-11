@@ -17,6 +17,9 @@ symbol_new(SymbolClass class, const char *name) {
 	m->assigned = false;
 	m->read = false;
 
+	m->args = NULL;
+	m->code = NULL;
+
 	m->next = NULL;
 
 	return m;
@@ -26,6 +29,17 @@ void
 symbol_free(Symbol *m) {
 	assert(m != NULL);
 	assert(m->name != NULL);
+
+	switch(m->class) {
+	case S_NONE:
+	case S_TYPE:
+	case S_VARIABLE:
+		break;
+	case S_BUILTIN:
+	case S_FUNCTION:
+		scope_free(m->args);
+		break;
+	}
 
 	free(m->name);
 	free(m);

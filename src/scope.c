@@ -3,6 +3,7 @@
 #include <assert.h>
 
 #include "scope.h"
+#include "utils.h"
 
 Scope *
 scope_new(Scope *p) {

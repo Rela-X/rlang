@@ -3,6 +3,7 @@
 #include <assert.h>
 
 #include "value.h"
+#include "utils.h"
 
 static void value_reset(Value *);
 
