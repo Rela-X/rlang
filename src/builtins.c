@@ -173,17 +173,27 @@ builtin_relation_is_transitive(Scope *args, MemorySpace *memspace) {
 
 void
 init_builtin_functions(Scope *builtin_scope) {
-	define_builtin_function(builtin_scope, T_VOID, "print", &builtin_print, 1, T_STRING);
+#define VA_NUM_ARGS(...) \
+	(sizeof(#__VA_ARGS__) == sizeof("") ? 0 : VA_NUM_ARGS_IMPL(__VA_ARGS__, 9,8,7,6,5,4,3,2,1))
+#define VA_NUM_ARGS_IMPL(_1,_2,_3,_4,_5,_6,_7,_8,_9,N,...) \
+	N
+#define def_function(rtype, name, fnptr, ...) \
+	define_builtin_function(builtin_scope, rtype, name, fnptr, VA_NUM_ARGS(__VA_ARGS__), __VA_ARGS__);
 
-	define_builtin_function(builtin_scope, T_STRING, "bool2str", &builtin_bool2str, 1, T_BOOL);
-	define_builtin_function(builtin_scope, T_STRING, "int2str", &builtin_int2str, 1, T_INT);
-	define_builtin_function(builtin_scope, T_STRING, "float2str", &builtin_float2str, 1, T_FLOAT);
-	define_builtin_function(builtin_scope, T_STRING, "set2str", &builtin_set2str, 1, T_SET);
-	define_builtin_function(builtin_scope, T_STRING, "r2str", &builtin_r2str, 1, T_R);
+	def_function(T_VOID, "print", &builtin_print, T_STRING);
 
-	define_builtin_function(builtin_scope, T_BOOL, "relation_is_homogeneous", &builtin_relation_is_homogeneous, 1, T_R);
-	define_builtin_function(builtin_scope, T_BOOL, "relation_is_reflexive", &builtin_relation_is_reflexive, 1, T_R);
-	define_builtin_function(builtin_scope, T_BOOL, "relation_is_symmetric", &builtin_relation_is_symmetric, 1, T_R);
-	define_builtin_function(builtin_scope, T_BOOL, "relation_is_antisymmetric", &builtin_relation_is_antisymmetric, 1, T_R);
-	define_builtin_function(builtin_scope, T_BOOL, "relation_is_transitive", &builtin_relation_is_transitive, 1, T_R);
+	def_function(T_STRING, "bool2str", &builtin_bool2str, T_BOOL);
+	def_function(T_STRING, "int2str", &builtin_int2str, T_INT);
+	def_function(T_STRING, "float2str", &builtin_float2str, T_FLOAT);
+	def_function(T_STRING, "set2str", &builtin_set2str, T_SET);
+	def_function(T_STRING, "r2str", &builtin_r2str, T_R);
+
+	def_function(T_BOOL, "relation_is_homogeneous", &builtin_relation_is_homogeneous, T_R);
+	def_function(T_BOOL, "relation_is_reflexive", &builtin_relation_is_reflexive, T_R);
+	def_function(T_BOOL, "relation_is_symmetric", &builtin_relation_is_symmetric, T_R);
+	def_function(T_BOOL, "relation_is_antisymmetric", &builtin_relation_is_antisymmetric, T_R);
+	def_function(T_BOOL, "relation_is_transitive", &builtin_relation_is_transitive, T_R);
+#undef def_function
+#undef VA_NUM_ARGS_IMPL
+#undef VA_NUM_ARGS
 }
