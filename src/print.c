@@ -2,6 +2,7 @@
 
 #include "print.h"
 #include "types.h"
+#include "utils.h"
 
 static char *node_name_table[] = {
 	[N_BLOCK] = "do", 
@@ -48,15 +49,15 @@ void print_node(FILE *f, const Ast *ast) {
 	assert(ast != NULL);
 
 	switch(ast->class) {
+	case N_IDENTIFIER:
 	case N_BOOLEAN:
 	case N_INTEGER:
 	case N_FLOAT:
 	case N_STRING:
-	case N_IDENTIFIER:
 		fprintf(f, "%s", ast->value);
 		break;
 	default:
-		if(node_name_table[ast->class] == NULL) {
+		if(ast->class >= len(node_name_table)) {
 			fprintf(f, "%s:%d:%s TODO %d", __FILE__, __LINE__, __func__, ast->class);
 			return;
 		}
@@ -149,7 +150,7 @@ print_type(FILE *f, const Type type) {
 	fprintf(f, "type(%d)", type);
 
 	assert(type >= 0);
-	assert(type < NTYPES);
+	assert(type < len(type_name_table));
 
 	fprintf(f, " => %s", type_name_table[type]);
 }
@@ -160,7 +161,7 @@ print_value(FILE *f, const Value *value) {
 
 	fprintf(f, "<");
 
-	if(value->type > 0 && value->type < NTYPES) {
+	if(value->type > 0 && value->type < len(type_name_table)) {
 		fprintf(f, "%s", type_name_table[value->type]);
 	} else if(value->type == T_VOID ){
 		fprintf(f, "void>");
