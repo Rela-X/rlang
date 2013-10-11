@@ -73,6 +73,8 @@ exec(const Ast *ast) {
 	case N_DECLARATION:
 		declaration(ast);
 		return;
+	case N_FUNCTION:
+		return;
 	case N_RETURN:
 		returnstat(ast);
 		return;
