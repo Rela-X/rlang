@@ -41,6 +41,7 @@ c99_id		([_[:alpha:]]|{ucn})([_[:alnum:]]|{ucn})*
 
 %x STR
 %x SET
+%x RTABLE
 
 %x COMMENT
 %x BLOCKCOMMENT
@@ -84,6 +85,7 @@ c99_id		([_[:alpha:]]|{ucn})([_[:alnum:]]|{ucn})*
 "("		{ TOKEN(LPAREN); }
 ")"		{ TOKEN(RPAREN); }
 
+":"		{ TOKEN(COLON); }
 ";"		{ TOKEN(SEMICOLON); }
 ","		{ TOKEN(COMMA); }
 
@@ -93,6 +95,7 @@ c99_id		([_[:alpha:]]|{ucn})([_[:alnum:]]|{ucn})*
 {c99_floating_point}	{ VALUE(FLOAT); }
 {c99_id}		{ VALUE(IDENTIFIER); }
 
+\"\"			{ yylval->value = strdup(""); return STRING; }
 <INITIAL>["]		{ yy_push_state(STR); }
 <STR>{
 	[^"]*		{ VALUE(STRING); }
@@ -101,14 +104,23 @@ c99_id		([_[:alpha:]]|{ucn})([_[:alnum:]]|{ucn})*
 
 <INITIAL>"//"		{ yy_push_state(COMMENT); }
 <COMMENT>{
-	.		{ }
+	.*		{ }
 	\n		{ yy_pop_state(); }
 }
 
 <*>"/*"			{ yy_push_state(BLOCKCOMMENT); }
 <BLOCKCOMMENT>{
-	.		{ }
+	.*|\n		{ }
 	"*/"		{ yy_pop_state(); }
+}
+
+<INITIAL>"["		{ yy_push_state(RTABLE); TOKEN(LBRACKET); }
+<RTABLE>{
+	"0"		{ VALUE(BOOLEAN); }
+	"1"		{ VALUE(BOOLEAN); }
+	"|"		{ TOKEN(VBAR); }
+	[[:space:]]	{ }
+	"]"		{ yy_pop_state(); TOKEN(RBRACKET); }
 }
 
 .	{ printf("UNHANDLED TOKEN \"%s\"\n", yytext); }

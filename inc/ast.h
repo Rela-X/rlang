@@ -14,7 +14,8 @@ enum _node_class {
 	N_AND, N_IOR, N_XOR,
 	N_LT, N_LE, N_GE, N_GT,
 	N_ADD, N_SUB, N_MUL, N_DIV, N_POW, N_MOD,
-	N_BOOLEAN, N_INTEGER, N_FLOAT, N_STRING, N_SET, N_R
+	N_BOOLEAN, N_INTEGER, N_FLOAT, N_STRING, N_SET, N_R,
+	N_RTABLE, N_RTABLEROW,
 };
 typedef enum _node_class NodeClass;
 

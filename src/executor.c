@@ -727,7 +727,30 @@ static
 Value *
 _relation(const Ast *expr) {
 	Value *rval = value_new();
-	value_set_relation(rval, rf_relation_from_string(expr->value));
+	Value *v1 = eval(expr->child);
+	Value *v2 = eval(expr->child->next);
+
+	Ast *rtable = expr->child->next->next;
+
+	rf_Set *domains[] = {
+		v1->as_Set,
+		v2->as_Set,
+	};
+	int table_size = domains[0]->cardinality * domains[1]->cardinality;
+	bool *table = calloc(table_size, sizeof(*table));
+	int i = 0;
+	for(Ast *rtable_row = rtable->child; rtable_row != NULL; rtable_row = rtable_row->next) {
+		for(Ast *rtable_cell = rtable_row->child; rtable_cell != NULL; rtable_cell = rtable_cell->next) {
+			assert(i < table_size);
+			table[i++] = rtable_cell->value[0] == '1';
+		}
+		assert(i % domains[0]->cardinality == 0);
+	}
+
+	value_set_relation(rval, rf_relation_new(domains[0], domains[1], table));
+
+	value_free(v1);
+	value_free(v2);
 
 	return rval;
 }

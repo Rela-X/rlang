@@ -65,6 +65,9 @@ void print_node(FILE *f, const Ast *ast) {
 		fprintf(f, " ");
 		fprintf(f, "}");
 		break;
+	case N_R:
+		fprintf(f, "[RELATION]");
+		break;
 	default:
 		if(ast->class >= len(node_name_table)) {
 			fprintf(f, "%s:%d:%s TODO %d", __FILE__, __LINE__, __func__, ast->class);

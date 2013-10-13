@@ -41,6 +41,7 @@ yyerror(YYLTYPE *llocp, Ast **ast, const char *yymsg) {
 %type  <node>  boolean_op arithmetic_comp arithmetic_op
 %type  <node>  identifier value
 %type  <node>  set set_elements set_element
+%type  <node>  relation rtable rtable_rows rtable_row
 
 %token <value> IDENTIFIER
 %token <value> BOOLEAN INTEGER FLOAT STRING
@@ -50,8 +51,8 @@ yyerror(YYLTYPE *llocp, Ast **ast, const char *yymsg) {
 %token WHILE DO
 %token RETURN BREAK CONTINUE
 
-%token LBRACE RBRACE LPAREN RPAREN
-%token SEMICOLON COMMA
+%token LBRACE RBRACE LPAREN RPAREN LBRACKET RBRACKET
+%token COLON SEMICOLON COMMA VBAR
 
 %token NOT EQ AND IOR XOR       // boolean comparators
 %token LT LE GE GT              // arithmetic comparators
@@ -127,12 +128,7 @@ expr            : LPAREN expr RPAREN            { $$ = $2; }
                 | expr arithmetic_op expr       { $$ = $2; ast_append_child_all($$, $1, $3); }
                 | value
                 | set
-/*
-                | INC identifier
-                | DEC identifier
-                | identifier INC
-                | identifier DEC
-*/
+                | relation
                 ;
 
 call_expr       : identifier LPAREN call_args RPAREN    { $$ = ast_new(N_CALL); ast_append_child_all($$, $1, $3); }
@@ -174,11 +170,13 @@ value           : BOOLEAN                       { $$ = ast_new(N_BOOLEAN); $$->v
                 | STRING                        { $$ = ast_new(N_STRING); $$->value = $1; }
                 ;
 
+relation        : set IDENTIFIER set COLON rtable       { $$ = ast_new(N_R); ast_append_child_all($$, $1, $3, $5); }
+                ;
+
 set             : LBRACE set_elements RBRACE    { $$ = $2; }
                 ;
 
 set_elements    : /* empty */                   { $$ = ast_new(N_SET); }
-                | set_element                   { $$ = ast_new(N_SET); ast_append_child($$, $1); }
                 | set_elements set_element      { ast_append_child($1, $2); }
                 ;
 
@@ -186,4 +184,16 @@ set_element     : value                         { $1->class = N_STRING; }
                 | identifier                    { $1->class = N_STRING; }
                 | set
                 ;
+
+rtable          : LBRACKET rtable_rows RBRACKET         { $$ = $2; }
+                ;
+
+rtable_rows     : rtable_row                            { $$ = ast_new(N_RTABLE); ast_append_child($$, $1); }
+                | rtable_rows VBAR VBAR rtable_row      { ast_append_child($1, $4); }
+                ;
+
+rtable_row      : value                                 { $$ = ast_new(N_RTABLEROW); ast_append_child($$, $1); }
+                | rtable_row value                      { ast_append_child($1, $2); }
+                ;
+
 %%
