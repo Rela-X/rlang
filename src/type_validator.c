@@ -9,9 +9,10 @@
 static void validate_tree(const Ast *ast);
 static void validate_ifstatement(const Ast *);
 static void validate_whilestatement(const Ast *);
-static void validate_assignment(const Ast *);
-static void validate_call(const Ast *);
 static void validate_return(const Ast *);
+static void validate_call(const Ast *);
+static void validate_assignment(const Ast *);
+static void validate_relational_expression(const Ast *);
 static bool valid_as_type(Ast *, Type);
 
 static const Type type_promotion_table[NTYPES][NTYPES] = {
@@ -58,6 +59,9 @@ validate_tree(const Ast *ast) {
 		break;
 	case N_ASSIGNMENT:
 		validate_assignment(ast);
+		break;
+	case N_R:
+		validate_relational_expression(ast);
 		break;
 	default:
 		for(Ast *c = ast->child; c != NULL; c = c->next) {
@@ -117,6 +121,17 @@ validate_assignment(const Ast *assignment) {
 	Ast *expr = assignment->child->next;
 
 	expr_check_type(expr, id->eval_type);
+}
+
+static
+void
+validate_relational_expression(const Ast *relation) {
+	Ast *domain1 = relation->child;
+	Ast *domain2 = relation->child->next;
+//	Ast *rtable = relation->child->next->next;
+
+	expr_check_type(domain1, T_SET);
+	expr_check_type(domain2, T_SET);
 }
 
 static inline
