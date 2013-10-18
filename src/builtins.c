@@ -153,6 +153,74 @@ builtin_set_is_subset(Scope *args, MemorySpace *memspace) {
 
 static
 Value *
+builtin_relation_new_union(Scope *args, MemorySpace *memspace) {
+	Value *arg[] = {
+		get_value_by_name(args, memspace, "0"),
+		get_value_by_name(args, memspace, "1"),
+	};
+	Value *rval = value_new();
+
+	value_set_relation(rval, rf_relation_new_union(arg[0]->as_Relation, arg[1]->as_Relation, NULL));
+
+	return rval;
+}
+
+static
+Value *
+builtin_relation_new_intersection(Scope *args, MemorySpace *memspace) {
+	Value *arg[] = {
+		get_value_by_name(args, memspace, "0"),
+		get_value_by_name(args, memspace, "1"),
+	};
+	Value *rval = value_new();
+
+	value_set_relation(rval, rf_relation_new_intersection(arg[0]->as_Relation, arg[1]->as_Relation, NULL));
+
+	return rval;
+}
+
+static
+Value *
+builtin_relation_new_concatenation(Scope *args, MemorySpace *memspace) {
+	Value *arg[] = {
+		get_value_by_name(args, memspace, "0"),
+		get_value_by_name(args, memspace, "1"),
+	};
+	Value *rval = value_new();
+
+	value_set_relation(rval, rf_relation_new_concatenation(arg[0]->as_Relation, arg[1]->as_Relation, NULL));
+
+	return rval;
+}
+
+static
+Value *
+builtin_relation_new_complement(Scope *args, MemorySpace *memspace) {
+	Value *arg[] = {
+		get_value_by_name(args, memspace, "0"),
+	};
+	Value *rval = value_new();
+
+	value_set_relation(rval, rf_relation_new_complement(arg[0]->as_Relation, NULL));
+
+	return rval;
+}
+
+static
+Value *
+builtin_relation_new_converse(Scope *args, MemorySpace *memspace) {
+	Value *arg[] = {
+		get_value_by_name(args, memspace, "0"),
+	};
+	Value *rval = value_new();
+
+	value_set_relation(rval, rf_relation_new_converse(arg[0]->as_Relation, NULL));
+
+	return rval;
+}
+
+static
+Value *
 builtin_relation_is_homogeneous(Scope *args, MemorySpace *memspace) {
 	Value *arg[] = {
 		get_value_by_name(args, memspace, "0"),
@@ -161,6 +229,97 @@ builtin_relation_is_homogeneous(Scope *args, MemorySpace *memspace) {
 	Value *rval = value_new();
 
 	value_set_bool(rval, rf_relation_is_homogeneous(arg[0]->as_Relation));
+
+	return rval;
+}
+
+static
+Value *
+builtin_relation_is_antisymmetric(Scope *args, MemorySpace *memspace) {
+	Value *arg[] = {
+		get_value_by_name(args, memspace, "0"),
+	};
+	Value *rval = value_new();
+
+	value_set_bool(rval, rf_relation_is_antisymmetric(arg[0]->as_Relation));
+
+	return rval;
+}
+
+static
+Value *
+builtin_relation_is_asymmetric(Scope *args, MemorySpace *memspace) {
+	Value *arg[] = {
+		get_value_by_name(args, memspace, "0"),
+	};
+	Value *rval = value_new();
+
+	value_set_bool(rval, rf_relation_is_asymmetric(arg[0]->as_Relation));
+
+	return rval;
+}
+
+static
+Value *
+builtin_relation_is_difunctional(Scope *args, MemorySpace *memspace) {
+	Value *arg[] = {
+		get_value_by_name(args, memspace, "0"),
+	};
+	Value *rval = value_new();
+
+	value_set_bool(rval, rf_relation_is_difunctional(arg[0]->as_Relation));
+
+	return rval;
+}
+
+static
+Value *
+builtin_relation_is_equivalent(Scope *args, MemorySpace *memspace) {
+	Value *arg[] = {
+		get_value_by_name(args, memspace, "0"),
+	};
+	Value *rval = value_new();
+
+	value_set_bool(rval, rf_relation_is_equivalent(arg[0]->as_Relation));
+
+	return rval;
+}
+
+static
+Value *
+builtin_relation_is_irreflexive(Scope *args, MemorySpace *memspace) {
+	Value *arg[] = {
+		get_value_by_name(args, memspace, "0"),
+	};
+	Value *rval = value_new();
+
+	value_set_bool(rval, rf_relation_is_irreflexive(arg[0]->as_Relation));
+
+	return rval;
+}
+
+static
+Value *
+builtin_relation_is_partial_order(Scope *args, MemorySpace *memspace) {
+	Value *arg[] = {
+		get_value_by_name(args, memspace, "0"),
+	};
+	Value *rval = value_new();
+
+	value_set_bool(rval, rf_relation_is_partial_order(arg[0]->as_Relation));
+
+	return rval;
+}
+
+static
+Value *
+builtin_relation_is_preorder(Scope *args, MemorySpace *memspace) {
+	Value *arg[] = {
+		get_value_by_name(args, memspace, "0"),
+	};
+	Value *rval = value_new();
+
+	value_set_bool(rval, rf_relation_is_preorder(arg[0]->as_Relation));
 
 	return rval;
 }
@@ -193,19 +352,6 @@ builtin_relation_is_symmetric(Scope *args, MemorySpace *memspace) {
 
 static
 Value *
-builtin_relation_is_antisymmetric(Scope *args, MemorySpace *memspace) {
-	Value *arg[] = {
-		get_value_by_name(args, memspace, "0"),
-	};
-	Value *rval = value_new();
-
-	value_set_bool(rval, rf_relation_is_antisymmetric(arg[0]->as_Relation));
-
-	return rval;
-}
-
-static
-Value *
 builtin_relation_is_transitive(Scope *args, MemorySpace *memspace) {
 	Value *arg[] = {
 		get_value_by_name(args, memspace, "0"),
@@ -213,6 +359,33 @@ builtin_relation_is_transitive(Scope *args, MemorySpace *memspace) {
 	Value *rval = value_new();
 
 	value_set_bool(rval, rf_relation_is_transitive(arg[0]->as_Relation));
+
+	return rval;
+}
+
+static
+Value *
+builtin_relation_is_lattice(Scope *args, MemorySpace *memspace) {
+	Value *arg[] = {
+		get_value_by_name(args, memspace, "0"),
+	};
+	Value *rval = value_new();
+
+	value_set_bool(rval, rf_relation_is_lattice(arg[0]->as_Relation, NULL));
+
+	return rval;
+}
+
+static
+Value *
+builtin_relation_is_sublattice(Scope *args, MemorySpace *memspace) {
+	Value *arg[] = {
+		get_value_by_name(args, memspace, "0"),
+		get_value_by_name(args, memspace, "1"),
+	};
+	Value *rval = value_new();
+
+	value_set_bool(rval, rf_relation_is_sublattice(arg[0]->as_Relation, arg[1]->as_Relation, NULL));
 
 	return rval;
 }
@@ -229,9 +402,23 @@ init_builtin_functions(Scope *builtin_scope) {
 
 	def_function(T_BOOL, "set_is_subset", &builtin_set_is_subset, T_SET, T_SET);
 
+	def_function(T_R, "relation_union", &builtin_relation_new_union, T_R, T_R);
+	def_function(T_R, "relation_intersection", &builtin_relation_new_intersection, T_R, T_R);
+	def_function(T_R, "relation_concatenation", &builtin_relation_new_concatenation, T_R, T_R);
+	def_function(T_R, "relation_complement", &builtin_relation_new_complement, T_R);
+	def_function(T_R, "relation_converse", &builtin_relation_new_converse, T_R);
+
 	def_function(T_BOOL, "relation_is_homogeneous", &builtin_relation_is_homogeneous, T_R);
+	def_function(T_BOOL, "relation_is_antisymmetric", &builtin_relation_is_antisymmetric, T_R);
+	def_function(T_BOOL, "relation_is_asymmetric", &builtin_relation_is_asymmetric, T_R);
+	def_function(T_BOOL, "relation_is_difunctional", &builtin_relation_is_difunctional, T_R);
+	def_function(T_BOOL, "relation_is_equivalent", &builtin_relation_is_equivalent, T_R);
+	def_function(T_BOOL, "relation_is_irreflexive", &builtin_relation_is_irreflexive, T_R);
+	def_function(T_BOOL, "relation_is_partial_order", &builtin_relation_is_partial_order, T_R);
+	def_function(T_BOOL, "relation_is_preorder", &builtin_relation_is_preorder, T_R);
 	def_function(T_BOOL, "relation_is_reflexive", &builtin_relation_is_reflexive, T_R);
 	def_function(T_BOOL, "relation_is_symmetric", &builtin_relation_is_symmetric, T_R);
-	def_function(T_BOOL, "relation_is_antisymmetric", &builtin_relation_is_antisymmetric, T_R);
 	def_function(T_BOOL, "relation_is_transitive", &builtin_relation_is_transitive, T_R);
+	def_function(T_BOOL, "relation_is_lattice", &builtin_relation_is_lattice, T_R);
+	def_function(T_BOOL, "relation_is_sublattice", &builtin_relation_is_sublattice, T_R, T_R);
 }
