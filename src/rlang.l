@@ -110,7 +110,7 @@ c99_id		([_[:alpha:]]|{ucn})([_[:alnum:]]|{ucn})*
 
 <*>"/*"			{ yy_push_state(BLOCKCOMMENT); }
 <BLOCKCOMMENT>{
-	.*|\n		{ }
+	[^*]*|\n	{ }
 	"*/"		{ yy_pop_state(); }
 }
 

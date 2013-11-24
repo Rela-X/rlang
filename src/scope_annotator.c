@@ -10,7 +10,7 @@ static void annotate_tree(Ast *);
 static void block(Ast *);
 static void function(Ast *);
 
-static const *root_scope;
+static const Scope *root_scope;
 
 void
 ast_annotate_scopes(Ast *ast, Scope *builtin_scope) {
