@@ -119,7 +119,7 @@ c99_id		([_[:alpha:]]|{ucn})([_[:alnum:]]|{ucn})*
 	"0"		{ VALUE(BOOLEAN); }
 	"1"		{ VALUE(BOOLEAN); }
 	"|"		{ TOKEN(VBAR); }
-	[[:space:]]	{ }
+	[[:space:]]*	{ }
 	"]"		{ yy_pop_state(); TOKEN(RBRACKET); }
 }
 

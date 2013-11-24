@@ -170,7 +170,7 @@ value           : BOOLEAN                       { $$ = ast_new(N_BOOLEAN); $$->v
                 | STRING                        { $$ = ast_new(N_STRING); $$->value = $1; }
                 ;
 
-relation        : set IDENTIFIER set COLON rtable       { $$ = ast_new(N_R); ast_append_child_all($$, $1, $3, $5); }
+relation        : set IDENTIFIER set COLON rtable       { $$ = ast_new(N_R); ast_append_child_all($$, $1, $3, $5); ast_free($2); }
                 ;
 
 set             : LBRACE set_elements RBRACE    { $$ = $2; }
