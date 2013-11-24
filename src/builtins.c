@@ -139,6 +139,33 @@ builtin_r2str(Scope *args, MemorySpace *memspace) {
 
 static
 Value *
+builtin_set_new_intersection(Scope *args, MemorySpace *memspace) {
+	Value *arg[] = {
+		get_value_by_name(args, memspace, "0"),
+		get_value_by_name(args, memspace, "1"),
+	};
+	Value *rval = value_new();
+
+	value_set_set(rval, rf_set_new_intersection(arg[0]->as_Set, arg[1]->as_Set));
+
+	return rval;
+}
+
+static
+Value *
+builtin_set_new_powerset(Scope *args, MemorySpace *memspace) {
+	Value *arg[] = {
+		get_value_by_name(args, memspace, "0"),
+	};
+	Value *rval = value_new();
+
+	value_set_set(rval, rf_set_new_powerset(arg[0]->as_Set));
+
+	return rval;
+}
+
+static
+Value *
 builtin_set_is_subset(Scope *args, MemorySpace *memspace) {
 	Value *arg[] = {
 		get_value_by_name(args, memspace, "0"),
@@ -225,7 +252,6 @@ builtin_relation_is_homogeneous(Scope *args, MemorySpace *memspace) {
 	Value *arg[] = {
 		get_value_by_name(args, memspace, "0"),
 	};
-	Value *v = get_value_by_name(args, memspace, "0");
 	Value *rval = value_new();
 
 	value_set_bool(rval, rf_relation_is_homogeneous(arg[0]->as_Relation));
@@ -390,18 +416,102 @@ builtin_relation_is_sublattice(Scope *args, MemorySpace *memspace) {
 	return rval;
 }
 
+static
+Value *
+builtin_relation_is_lefttotal(Scope *args, MemorySpace *memspace) {
+	Value *arg[] = {
+		get_value_by_name(args, memspace, "0"),
+	};
+	Value *rval = value_new();
+
+	value_set_bool(rval, rf_relation_is_lefttotal(arg[0]->as_Relation));
+
+	return rval;
+}
+
+static
+Value *
+builtin_relation_is_functional(Scope *args, MemorySpace *memspace) {
+	Value *arg[] = {
+		get_value_by_name(args, memspace, "0"),
+	};
+	Value *rval = value_new();
+
+	value_set_bool(rval, rf_relation_is_functional(arg[0]->as_Relation));
+
+	return rval;
+}
+
+static
+Value *
+builtin_relation_is_function(Scope *args, MemorySpace *memspace) {
+	Value *arg[] = {
+		get_value_by_name(args, memspace, "0"),
+	};
+	Value *rval = value_new();
+
+	value_set_bool(rval, rf_relation_is_function(arg[0]->as_Relation));
+
+	return rval;
+}
+
+static
+Value *
+builtin_relation_is_surjective(Scope *args, MemorySpace *memspace) {
+	Value *arg[] = {
+		get_value_by_name(args, memspace, "0"),
+	};
+	Value *rval = value_new();
+
+	value_set_bool(rval, rf_relation_is_surjective(arg[0]->as_Relation));
+
+	return rval;
+}
+
+static
+Value *
+builtin_relation_is_injective(Scope *args, MemorySpace *memspace) {
+	Value *arg[] = {
+		get_value_by_name(args, memspace, "0"),
+	};
+	Value *rval = value_new();
+
+	value_set_bool(rval, rf_relation_is_injective(arg[0]->as_Relation));
+
+	return rval;
+}
+
+static
+Value *
+builtin_relation_is_bijective(Scope *args, MemorySpace *memspace) {
+	Value *arg[] = {
+		get_value_by_name(args, memspace, "0"),
+	};
+	Value *rval = value_new();
+
+	value_set_bool(rval, rf_relation_is_bijective(arg[0]->as_Relation));
+
+	return rval;
+}
 void
 init_builtin_functions(Scope *builtin_scope) {
+	/* basic functions */
 	def_function(T_VOID, "print", &builtin_print, T_STRING);
 
+	/* conversion functions */
 	def_function(T_STRING, "bool2str", &builtin_bool2str, T_BOOL);
 	def_function(T_STRING, "int2str", &builtin_int2str, T_INT);
 	def_function(T_STRING, "float2str", &builtin_float2str, T_FLOAT);
 	def_function(T_STRING, "set2str", &builtin_set2str, T_SET);
 	def_function(T_STRING, "r2str", &builtin_r2str, T_R);
 
+	/* set functions */
+	def_function(T_SET, "set_intersection", &builtin_set_new_intersection, T_SET, T_SET);
+	def_function(T_SET, "set_powerset", &builtin_set_new_powerset, T_SET);
+
 	def_function(T_BOOL, "set_is_subset", &builtin_set_is_subset, T_SET, T_SET);
 
+	/* relation functions */
 	def_function(T_R, "relation_union", &builtin_relation_new_union, T_R, T_R);
 	def_function(T_R, "relation_intersection", &builtin_relation_new_intersection, T_R, T_R);
 	def_function(T_R, "relation_concatenation", &builtin_relation_new_concatenation, T_R, T_R);
@@ -421,4 +531,10 @@ init_builtin_functions(Scope *builtin_scope) {
 	def_function(T_BOOL, "relation_is_transitive", &builtin_relation_is_transitive, T_R);
 	def_function(T_BOOL, "relation_is_lattice", &builtin_relation_is_lattice, T_R);
 	def_function(T_BOOL, "relation_is_sublattice", &builtin_relation_is_sublattice, T_R, T_R);
+	def_function(T_BOOL, "relation_is_lefttotal", &builtin_relation_is_lefttotal, T_R);
+	def_function(T_BOOL, "relation_is_functional", &builtin_relation_is_functional, T_R);
+	def_function(T_BOOL, "relation_is_function", &builtin_relation_is_function, T_R);
+	def_function(T_BOOL, "relation_is_surjective", &builtin_relation_is_surjective, T_R);
+	def_function(T_BOOL, "relation_is_injective", &builtin_relation_is_injective, T_R);
+	def_function(T_BOOL, "relation_is_bijective", &builtin_relation_is_bijective, T_R);
 }
