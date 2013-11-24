@@ -10,6 +10,7 @@ static void annotate_function_symbols(Ast *);
 static void annotate_variable_symbols(Ast *);
 static void function(Ast *, Ast *, Ast *, Ast *);
 static void annotate_return_stmts(Ast *, Symbol *);
+static void functionargs(Ast *);
 static void declaration(Ast *, Ast *);
 static void assignment(Ast *, Ast *);
 static void identifier(Ast *);
@@ -49,6 +50,9 @@ annotate_variable_symbols(Ast *ast) {
 	assert(ast->scope != NULL);
 
 	switch(ast->class) {
+	case N_FUNCTIONARGS:
+		functionargs(ast);
+		break;
 	case N_DECLARATION:
 		declaration(ast->child, ast->child->next);
 		break;
@@ -96,6 +100,15 @@ annotate_return_stmts(Ast *ast, Symbol *sy) {
 		for(Ast *c = ast->child; c != NULL; c = c->next) {
 			annotate_return_stmts(c, sy);
 		}
+	}
+}
+
+static
+void
+functionargs(Ast *fnargs) {
+	for(Ast *c = fnargs->child; c != NULL; c = c->next) {
+		annotate_variable_symbols(c);
+		c->child->next->symbol->assigned = true;
 	}
 }
 
