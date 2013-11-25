@@ -66,7 +66,7 @@ c99_id		([_[:alpha:]]|{ucn})([_[:alnum:]]|{ucn})*
 
 "<"		{ TOKEN(LT); }
 "<="		{ TOKEN(LE); }
-">="		{ TOKEN(LE); }
+">="		{ TOKEN(GE); }
 ">"		{ TOKEN(GT); }
 
 "++"		{ TOKEN(INC); }
