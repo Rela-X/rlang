@@ -330,8 +330,14 @@ _neg(const Ast *expr) {
 
 	Value *rval = eval(op1);
 
-	// NATIVE_NUMBER always results in "float". This doesn't.
-	value_set(rval, - (rval->type == T_INT) ? rval->as_int : rval->as_float);
+	switch(rval->type) {
+	case T_INT:
+		value_set_int(rval, -1 * rval->as_int);
+		break;
+	case T_FLOAT:
+		value_set_float(rval, -1 * rval->as_float);
+		break;
+	}
 
 	return rval;
 }
@@ -359,7 +365,7 @@ _eq(const Ast *expr) {
 	Value *rval = v1;
 
 	if(v1->type != v2->type) {
-		value_set(rval, false);
+		value_set_bool(rval, false);
 	} else {
 		switch(v1->type) {
 		case T_BOOL:
