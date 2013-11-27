@@ -142,7 +142,7 @@ ifstat(const Ast *if_stmt) {
 	Value *cond;
 	if((cond = eval(cond_expr))->as_bool) {
 		exec(then_stmt);
-	} else {
+	} else if(else_stmt != NULL) {
 		exec(else_stmt);
 	}
 	value_free(cond);
@@ -379,6 +379,12 @@ _eq(const Ast *expr) {
 			break;
 		case T_STRING:
 			value_set_bool(rval, strcmp(v1->as_String, v2->as_String) == 0);
+			break;
+		case T_SET:
+			value_set_bool(rval, rf_set_equal(v1->as_Set, v2->as_Set));
+			break;
+		case T_R:
+			value_set_bool(rval, false); // TODO
 			break;
 		}
 	}
