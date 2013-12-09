@@ -40,7 +40,6 @@ nondigit	[_[:alpha:]]
 c99_id		([_[:alpha:]]|{ucn})([_[:alnum:]]|{ucn})*
 
 %x STR
-%x SET
 %x RTABLE
 
 %x COMMENT

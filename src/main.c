@@ -14,6 +14,7 @@ extern void ast_annotate_symbols(Ast *);
 extern void ast_annotate_types(Ast *);
 extern void ast_validate_types(Ast *);
 extern void ast_execute(Ast *);
+extern void ast_cleanup(Ast *);
 
 static
 void

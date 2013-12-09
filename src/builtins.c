@@ -2,6 +2,10 @@
 #include <stdarg.h>
 #include <assert.h>
 
+#include <set.h>
+#include <relation.h>
+#include <text_io.h>
+
 #include "ast.h"
 #include "memory.h"
 #include "print.h"

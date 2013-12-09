@@ -1,4 +1,7 @@
+#include <stdlib.h>
 #include <assert.h>
+
+#include <text_io.h>
 
 #include "print.h"
 #include "types.h"
