@@ -170,7 +170,7 @@ value           : BOOLEAN                       { $$ = ast_new(N_BOOLEAN); $$->v
                 | STRING                        { $$ = ast_new(N_STRING); $$->value = $1; }
                 ;
 
-relation        : set IDENTIFIER set COLON rtable       { if($2[0] != 'x' || $2[1] != '\0') YYABORT; free($2); $$ = ast_new(N_R); ast_append_child_all($$, $1, $3, $5); }
+relation        : expr IDENTIFIER expr COLON rtable       { if($2[0] != 'x' || $2[1] != '\0') YYABORT; free($2); $$ = ast_new(N_R); ast_append_child_all($$, $1, $3, $5); }
                 ;
 
 set             : LBRACE set_elements RBRACE    { $$ = $2; }
