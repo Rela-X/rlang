@@ -6,7 +6,8 @@
 #include "print.h"
 #include "types.h"
 
-static Type annotate_tree(Ast *);
+static Type annotate_symbol_types(Ast *);
+static Type annotate_expr_types(Ast *);
 static Type vardecl(const Ast *);
 static Type function(const Ast *);
 static Type return_stmt(const Ast *);
@@ -69,17 +70,32 @@ void
 ast_annotate_types(Ast *ast) {
 	printf("setting type annotations\n");
 
-	ast->eval_type = annotate_tree(ast);
+	annotate_symbol_types(ast);
+	annotate_expr_types(ast);
+
+	ast->eval_type = T_VOID;
 }
 
 static
 Type
-annotate_tree(Ast *ast) {
+annotate_symbol_types(Ast *ast) {
 	switch(ast->class) {
 	case N_DECLARATION:
 		return vardecl(ast);
 	case N_FUNCTION:
 		return function(ast);
+	default:
+		for(Ast *c = ast->child; c != NULL; c = c->next) {
+			c->eval_type = annotate_symbol_types(c);
+		}
+		return T_VOID;
+	}
+}
+
+static
+Type
+annotate_expr_types(Ast *ast) {
+	switch(ast->class) {
 	case N_RETURN:
 		return return_stmt(ast);
 	case N_CALL:
@@ -122,7 +138,7 @@ annotate_tree(Ast *ast) {
 		return T_R;
 	default:
 		for(Ast *c = ast->child; c != NULL; c = c->next) {
-			c->eval_type = annotate_tree(c);
+			c->eval_type = annotate_expr_types(c);
 		}
 		return T_VOID;
 	}
@@ -136,8 +152,8 @@ vardecl(const Ast *vardecl) {
 
 	set_symbol_type(type, id);
 
-	type->eval_type = annotate_tree(type);
-	id->eval_type = annotate_tree(id);
+	type->eval_type = annotate_symbol_types(type);
+	id->eval_type = annotate_symbol_types(id);
 
 	return T_VOID;
 }
@@ -152,10 +168,10 @@ function(const Ast *function) {
 
 	set_symbol_type(type, id);
 
-	type->eval_type = annotate_tree(type);
-	id->eval_type = annotate_tree(id);
-	args->eval_type = annotate_tree(args);
-	block->eval_type = annotate_tree(block);
+	type->eval_type = annotate_symbol_types(type);
+	id->eval_type = annotate_symbol_types(id);
+	args->eval_type = annotate_symbol_types(args);
+	block->eval_type = annotate_symbol_types(block);
 
 	return T_VOID;
 }
@@ -166,7 +182,7 @@ return_stmt(const Ast *return_stmt) {
 	Ast *expr = return_stmt->child;
 
 	if(expr != NULL) {
-		expr->eval_type = annotate_tree(expr);
+		expr->eval_type = annotate_expr_types(expr);
 	}
 
 	Type t = get_symbol_type(return_stmt);
@@ -180,8 +196,8 @@ call(const Ast *call) {
 	Ast *id = call->child;
 	Ast *args = call->child->next;
 
-	id->eval_type = annotate_tree(id);
-	args->eval_type = annotate_tree(args);
+	id->eval_type = annotate_expr_types(id);
+	args->eval_type = annotate_expr_types(args);
 
 	Type t = get_symbol_type(id);
 
@@ -199,7 +215,7 @@ identifier(const Ast *id) {
 static
 Type
 unary_op(const Ast *op) {
-	op->child->eval_type = annotate_tree(op->child);
+	op->child->eval_type = annotate_expr_types(op->child);
 
 	return op->child->eval_type;
 }
@@ -210,8 +226,8 @@ equality_op(const Ast *op) {
 	Ast *left = op->child;
 	Ast *right = op->child->next;
 
-	left->eval_type = annotate_tree(left);
-	right->eval_type = annotate_tree(right);
+	left->eval_type = annotate_expr_types(left);
+	right->eval_type = annotate_expr_types(right);
 
 	Type t = op_type(equality_result_type_table, left, right);
 
@@ -224,8 +240,8 @@ boolean_op(const Ast *op) {
 	Ast *left = op->child;
 	Ast *right = op->child->next;
 
-	left->eval_type = annotate_tree(left);
-	right->eval_type = annotate_tree(right);
+	left->eval_type = annotate_expr_types(left);
+	right->eval_type = annotate_expr_types(right);
 
 	Type t = op_type(boolean_result_type_table, left, right);
 
@@ -238,8 +254,8 @@ arithmetic_op(const Ast *op) {
 	Ast *left = op->child;
 	Ast *right = op->child->next;
 
-	left->eval_type = annotate_tree(left);
-	right->eval_type = annotate_tree(right);
+	left->eval_type = annotate_expr_types(left);
+	right->eval_type = annotate_expr_types(right);
 
 	Type t = op_type(arithmetic_result_type_table, left, right);
 
@@ -252,8 +268,8 @@ relational_op(const Ast *op) {
 	Ast *left = op->child;
 	Ast *right = op->child->next;
 
-	right->eval_type = annotate_tree(left);
-	left->eval_type = annotate_tree(right);
+	right->eval_type = annotate_expr_types(left);
+	left->eval_type = annotate_expr_types(right);
 
 	Type t = op_type(relational_result_type_table, left, right);
 
