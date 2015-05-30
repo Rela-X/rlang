@@ -1,5 +1,5 @@
-#ifndef UTILS_H_
-#define UTILS_H_
+#ifndef _UTILS_H
+#define _UTILS_H
 
 #define len(array) (sizeof(array) / sizeof(*array))
 

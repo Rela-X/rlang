@@ -1,5 +1,5 @@
-#ifndef AST_H_
-#define AST_H_
+#ifndef _AST_H
+#define _AST_H
 
 #include "scope.h"
 #include "symbol.h"

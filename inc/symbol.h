@@ -1,5 +1,5 @@
-#ifndef SYMBOL_H_
-#define SYMBOL_H_
+#ifndef _SYMBOL_H
+#define _SYMBOL_H
 
 #include <stdbool.h>
 

@@ -1,5 +1,5 @@
-#ifndef SCOPE_H_
-#define SCOPE_H_
+#ifndef _SCOPE_H
+#define _SCOPE_H
 
 #include "symbol.h"
 

@@ -1,5 +1,5 @@
-#ifndef TYPES_H_
-#define TYPES_H_
+#ifndef _TYPES_H
+#define _TYPES_H
 
 enum _type {
 	T_NONE = -1,
