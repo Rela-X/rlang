@@ -375,7 +375,7 @@ _eq(const Ast *expr) {
 			value_set_bool(rval, v1->as_int == v2->as_int);
 			break;
 		case T_FLOAT:
-			value_set_bool(rval, abs((v1->as_float - v2->as_float)) < 0.05);
+			value_set_bool(rval, fabs((v1->as_float - v2->as_float)) < 0.05);
 			break;
 		case T_STRING:
 			value_set_bool(rval, strcmp(v1->as_String, v2->as_String) == 0);
