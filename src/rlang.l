@@ -9,7 +9,7 @@
 #include "rlang.tab.h"
 
 #define TOKEN(t) return t
-#define VALUE(v) yylval->value = strdup(yytext); return v
+#define VALUE(v) yylval->value = strndup(yytext, yyleng); return v
 
 // http://flex.sourceforge.net/manual/Common-Patterns.html#Common-Patterns
 %}
