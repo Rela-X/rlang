@@ -34,7 +34,9 @@ memspace_store(MemorySpace *memory_space, Memory *memory) {
 
 void
 memspace_free(MemorySpace *memory_space) {
-	for(Memory *m = memory_space->mem, *next = NULL; m != NULL; m = next) {
+	Memory *m;
+	Memory *next = memory_space->mem;
+	while((m = next) != NULL) {
 		next = m->next;
 		mem_free(m);
 	}

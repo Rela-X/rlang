@@ -246,7 +246,6 @@ Value *
 call(const Ast *expr) {
 	Ast *id = expr->child;
 	Ast *cargs = expr->child->next;
-	Value *rval;
 
 	MemorySpace *global_memspace = current_memspace;
 	while(global_memspace->parent != NULL)
@@ -281,6 +280,7 @@ call(const Ast *expr) {
 
 	memspace_free(fn_memspace);
 
+	Value *rval;
 	if(callstack_returnvalue != NULL) {
 		rval = callstack_returnvalue;
 		callstack_returnvalue = NULL;
@@ -349,7 +349,7 @@ _not(const Ast *expr) {
 
 	Value *rval = eval(op1);
 
-	value_set_bool(rval, ! rval->as_bool);
+	value_set_bool(rval, !rval->as_bool);
 
 	return rval;
 }
@@ -437,7 +437,7 @@ _ior(const Ast *expr) {
 	}
 	value_free(v1);
 
-	return eval(op2);;
+	return eval(op2);
 }
 
 
