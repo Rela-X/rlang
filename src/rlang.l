@@ -42,7 +42,7 @@ c99_id		([_[:alpha:]]|{ucn})([_[:alnum:]]|{ucn})*
 %x STR
 %x RTABLE
 
-%x COMMENT
+%x LINECOMMENT
 %x BLOCKCOMMENT
 %%
 
@@ -101,8 +101,8 @@ c99_id		([_[:alpha:]]|{ucn})([_[:alnum:]]|{ucn})*
 	["]		{ yy_pop_state(); }
 }
 
-<INITIAL>"//"		{ yy_push_state(COMMENT); }
-<COMMENT>{
+<INITIAL>"//"		{ yy_push_state(LINECOMMENT); }
+<LINECOMMENT>{
 	.*		{ }
 	\n		{ yy_pop_state(); }
 }
