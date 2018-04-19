@@ -5,5 +5,5 @@ LEX     = flex
 YACC    = bison --yacc
 YFLAGS  = -d -t
 
-INC     = -I ../relafix/inc/
+INC     = -I .
 LIBPATH = -L ../relafix/

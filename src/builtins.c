@@ -3,9 +3,9 @@
 #include <assert.h>
 #include <string.h>
 
-#include <set.h>
-#include <relation.h>
-#include <text_io.h>
+#include <relafix/set.h>
+#include <relafix/relation.h>
+#include <relafix/text_io.h>
 
 #include "ast.h"
 #include "memory.h"
