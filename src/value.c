@@ -10,6 +10,7 @@ static void value_reset(Value *);
 Value *
 value_new() {
 	Value *m = malloc(sizeof(*m));
+	assert(m != NULL);
 	m->type = T_NONE;
 	value_reset(m);
 
@@ -121,10 +122,9 @@ value_reset(Value *v) {
 }
 
 void
-value_free(Value *v) {
-	assert(v != NULL);
+value_free(Value *m) {
+	if(m)
+		value_reset(m);
 
-	value_reset(v);
-
-	free(v);
+	free(m);
 }

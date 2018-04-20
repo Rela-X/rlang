@@ -27,21 +27,20 @@ symbol_new(SymbolClass class, const char *name) {
 
 void
 symbol_free(Symbol *m) {
-	assert(m != NULL);
-	assert(m->name != NULL);
+	if(m) {
+		switch(m->class) {
+		case S_NONE:
+		case S_TYPE:
+		case S_VARIABLE:
+			break;
+		case S_BUILTIN:
+		case S_FUNCTION:
+			scope_free(m->args);
+			break;
+		}
 
-	switch(m->class) {
-	case S_NONE:
-	case S_TYPE:
-	case S_VARIABLE:
-		break;
-	case S_BUILTIN:
-	case S_FUNCTION:
-		scope_free(m->args);
-		break;
+		free(m->name);
 	}
-
-	free(m->name);
 	free(m);
 }
 

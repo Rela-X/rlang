@@ -66,11 +66,11 @@ scope_resolve_recursive(const Scope *scope, const char *name) {
 
 void
 scope_free(Scope *scope) {
-	assert(scope != NULL);
-
-	for(Symbol *sy = scope->symbols, *next = NULL; sy != NULL; sy = next) {
-		next = sy->next;
-		symbol_free(sy);
+	if(scope) {
+		for(Symbol *sy = scope->symbols, *next = NULL; sy != NULL; sy = next) {
+			next = sy->next;
+			symbol_free(sy);
+		}
 	}
 	free(scope);
 }

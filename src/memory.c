@@ -34,11 +34,11 @@ memspace_store(MemorySpace *memory_space, Memory *memory) {
 
 void
 memspace_free(MemorySpace *memory_space) {
-	Memory *m;
-	Memory *next = memory_space->mem;
-	while((m = next) != NULL) {
-		next = m->next;
-		mem_free(m);
+	if(memory_space) {
+		for(Memory *m = memory_space->mem, *next = NULL; m != NULL; m = next) {
+			next = m->next;
+			mem_free(m);
+		}
 	}
 	free(memory_space);
 }
@@ -57,9 +57,8 @@ mem_new(Symbol *symbol) {
 
 void
 mem_free(Memory *mem) {
-	assert(mem != NULL);
-	assert(mem->value != NULL);
-
-	value_free(mem->value);
+	if(mem) {
+		value_free(mem->value);
+	}
 	free(mem);
 }

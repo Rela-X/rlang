@@ -71,15 +71,13 @@ void _ast_append_child_all(Ast *ast, ...) {
 }
 
 void ast_free(Ast *ast) {
-	assert(ast != NULL);
-
-	if(ast->value != NULL)
+	if(ast) {
 		free(ast->value);
 
-	for(Ast *c = ast->child, *next = NULL; c != NULL; c = next) {
-		next = c->next;
-		ast_free(c);
+		for(Ast *c = ast->child, *next = NULL; c != NULL; c = next) {
+			next = c->next;
+			ast_free(c);
+		}
 	}
 	free(ast);
 }
-
