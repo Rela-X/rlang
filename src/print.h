@@ -7,6 +7,7 @@
 #include "value.h"
 
 #ifndef foobarbaz
+
 #define pn(n)  do { print_node(stdout, n); printf("\n"); } while(0)
 #define pns(n) do { print_node_symbolinfo(stdout, n); printf("\n"); } while(0)
 #define pnt(n) do { print_node_typeinfo(stdout, n); printf("\n"); } while(0)
