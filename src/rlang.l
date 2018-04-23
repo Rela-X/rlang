@@ -97,29 +97,31 @@ c99_id		([_[:alpha:]]|{ucn})([_[:alnum:]]|{ucn})*
 \"\"			{ yylval->value = strdup(""); return STRING; }
 <INITIAL>["]		{ yy_push_state(STR); }
 <STR>{
-	[^"]*		{ VALUE(STRING); }
 	["]		{ yy_pop_state(); }
+	[^"]*		{ VALUE(STRING); }
 }
 
 <INITIAL>"//"		{ yy_push_state(LINECOMMENT); }
 <LINECOMMENT>{
-	.*		{ }
 	\n		{ yy_pop_state(); }
+	.*		{ }
 }
 
 <*>"/*"			{ yy_push_state(BLOCKCOMMENT); }
 <BLOCKCOMMENT>{
-	[^*]*|\n	{ }
 	"*/"		{ yy_pop_state(); }
+	[^*\n]+		{ }
+	"*"[^/]		{ }
+	\n		{ }
 }
 
 <INITIAL>"["		{ yy_push_state(RTABLE); TOKEN(LBRACKET); }
 <RTABLE>{
+	"]"		{ yy_pop_state(); TOKEN(RBRACKET); }
 	"0"		{ VALUE(BOOLEAN); }
 	"1"		{ VALUE(BOOLEAN); }
 	"|"		{ TOKEN(VBAR); }
 	[[:space:]]*	{ }
-	"]"		{ yy_pop_state(); TOKEN(RBRACKET); }
 }
 
 .	{ printf("UNHANDLED TOKEN \"%s\"\n", yytext); }
