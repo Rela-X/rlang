@@ -8,8 +8,8 @@
 #include "ast.h"
 #include "rlang.tab.h"
 
-#define TOKEN(t) return t
-#define VALUE(v) yylval->value = strndup(yytext, yyleng); return v
+#define TOKEN(t) do { return t; } while(0)
+#define VALUE(v) do { yylval->value = strndup(yytext, yyleng); return v; } while(0)
 
 // http://flex.sourceforge.net/manual/Common-Patterns.html#Common-Patterns
 %}
