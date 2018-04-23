@@ -46,7 +46,7 @@ c99_id		([_[:alpha:]]|{ucn})([_[:alnum:]]|{ucn})*
 %x BLOCKCOMMENT
 %%
 
-[ \t\r\n]+	{ }
+[[:space:]]+	{ }
 
 ":="		{ TOKEN(ASSIGN); }
 "="		{ TOKEN(ASSIGN); }
