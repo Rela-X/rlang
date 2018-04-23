@@ -1,4 +1,6 @@
 %option bison-bridge
+%option bison-locations
+%option yylineno
 %option noyywrap
 %option stack
 
@@ -7,6 +9,17 @@
 
 #include "ast.h"
 #include "rlang.tab.h"
+
+static inline
+void yylloc_update(YYLTYPE *yylloc) {
+	yylloc->first_line   = yylloc->last_line;
+	yylloc->first_column = yylloc->last_column;
+	yylloc->last_line    = yylineno;
+	yylloc->last_column  = (yylloc->first_line == yylloc->last_line) ? yylloc->last_column + yyleng : 1;
+}
+
+// YY_USER_ACTION requires ';'
+#define YY_USER_ACTION do { yylloc_update(yylloc); } while(0);
 
 #define TOKEN(t) do { return t; } while(0)
 #define VALUE(v) do { yylval->value = strndup(yytext, yyleng); return v; } while(0)

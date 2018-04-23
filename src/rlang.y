@@ -12,8 +12,14 @@
 int yylex(YYSTYPE *, YYLTYPE *);
 
 void
-yyerror(YYLTYPE *llocp, Ast **ast, const char *yymsg) {
-	printf("my_yyerror: %s\n", yymsg);
+yyerror(YYLTYPE *yyllocp, Ast **ast, const char *yymsg) {
+	printf("my_yyerror at %d:%d-%d:%d %s\n",
+		yyllocp->first_line,
+		yyllocp->first_column,
+		yyllocp->last_line,
+		yyllocp->last_column,
+		yymsg
+	);
 }
 
 %}
