@@ -10,15 +10,9 @@ static void annotate_tree(Ast *);
 static void block(Ast *);
 static void function(Ast *);
 
-static const Scope *root_scope;
-
 void
 ast_annotate_scopes(Ast *ast, Scope *builtin_scope) {
-	printf("setting scope annotations\n");
-
 	ast->scope = builtin_scope;
-	root_scope = builtin_scope;
-
 	annotate_tree(ast);
 }
 
@@ -65,7 +59,9 @@ function(Ast *fn) {
 	id->scope = fn->scope;
 
 	Scope *global_scope = fn->scope;
-	while(global_scope->parent != root_scope)
+	// * { global_scope { builtin_scope { NULL } } }
+	assert(global_scope->parent != NULL);
+	while(global_scope->parent->parent != NULL)
 		global_scope = global_scope->parent;
 
 	Scope *parameter_scope = scope_new(global_scope);
