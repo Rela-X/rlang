@@ -39,7 +39,7 @@ int
 main() {
 	yydebug = 0;
 
-	Ast *root;
+	Ast *root = NULL;
 	int value;
 	value = yyparse(&root);
 	if(value != 0) {
