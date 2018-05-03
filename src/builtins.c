@@ -498,6 +498,7 @@ builtin_relation_is_bijective(Scope *args, MemorySpace *memspace) {
 
 	return rval;
 }
+
 void
 init_builtin_functions(Scope *builtin_scope) {
 	/* basic functions */
