@@ -10,9 +10,9 @@ extern int yyparse(Ast **ast);
 extern int yydebug;
 
 extern void ast_annotate_scopes(Ast *, Scope *);
-extern void ast_annotate_symbols(Ast *);
+extern int ast_annotate_symbols(Ast *);
 extern void ast_annotate_types(Ast *);
-extern void ast_validate_types(Ast *);
+extern int ast_validate_types(Ast *);
 extern void ast_execute(Ast *);
 extern void ast_cleanup(Ast *);
 
@@ -40,10 +40,10 @@ main() {
 	yydebug = 0;
 
 	Ast *root = NULL;
-	int value;
-	value = yyparse(&root);
-	if(value != 0) {
-		goto cleanup_ast;
+	int err = 0;
+	if((err = yyparse(&root))) {
+		assert(root == NULL);
+		goto exit;
 	}
 
 	printf("### AST:\n\n");
@@ -58,10 +58,10 @@ main() {
 
 	ast_annotate_scopes(root, builtin_scope);
 
-	ast_annotate_symbols(root);
+	if((err = ast_annotate_symbols(root))) goto cleanup_ast_meta;
 
 	ast_annotate_types(root);
-	ast_validate_types(root);
+	if((err = ast_validate_types(root))) goto cleanup_ast_meta;
 
 	ast_execute(root);
 
@@ -70,6 +70,6 @@ cleanup_ast_meta:
 	scope_free(builtin_scope);
 cleanup_ast:
 	ast_free(root);
-
-	return value;
+exit:
+	return err;
 }

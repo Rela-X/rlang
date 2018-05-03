@@ -6,84 +6,93 @@
 #include "print.h"
 #include "scope.h"
 
-static void annotate_function_symbols(Ast *);
-static void annotate_variable_symbols(Ast *);
-static void function(Ast *, Ast *, Ast *, Ast *);
+static int annotate_function_symbols(Ast *);
+static int annotate_variable_symbols(Ast *);
+static int function(Ast *, Ast *, Ast *, Ast *);
 static void annotate_return_stmts(Ast *, Symbol *);
-static void functionargs(Ast *);
-static void declaration(Ast *, Ast *);
-static void assignment(Ast *, Ast *);
-static void identifier(Ast *);
-static void annotate_type_symbol(Ast *);
-static void annotate_identifier_symbol(Ast *);
-static void define_symbol(const Ast *, SymbolClass);
+static int functionargs(Ast *);
+static int declaration(Ast *, Ast *);
+static int assignment(Ast *, Ast *);
+static int identifier(Ast *);
+static bool type_symbol_ok(Ast *);
+static bool identifier_symbol_ok(Ast *);
+static int define_symbol(const Ast *, SymbolClass);
 static inline Symbol *resolve_symbol(const Ast *);
 static inline Symbol *resolve_symbol_recursive(const Ast *);
 
-void
+int
 ast_annotate_symbols(Ast *ast) {
-	printf("setting and validating symbol annotations\n");
-
-	annotate_function_symbols(ast);
-	annotate_variable_symbols(ast);
+	int err = 0;
+	if((err = annotate_function_symbols(ast))) return err;
+	if((err = annotate_variable_symbols(ast))) return err;
+	return err;
 }
 
 static
-void
+int
 annotate_function_symbols(Ast *ast) {
 	assert(ast->scope != NULL);
 
 	switch(ast->class) {
 	case N_FUNCTION:
-		function(ast->child, ast->child->next, ast->child->next->next, ast->child->next->next->next);
-		break;
+		return function(ast->child, ast->child->next, ast->child->next->next, ast->child->next->next->next);
 	default:
 		for(Ast *c = ast->child; c != NULL; c = c->next) {
-			annotate_function_symbols(c);
+			int err = 0;
+			if((err = annotate_function_symbols(c))) return err;
 		}
 	}
+
+	return 0;
 }
 
 static
-void
+int
 annotate_variable_symbols(Ast *ast) {
 	assert(ast->scope != NULL);
 
 	switch(ast->class) {
 	case N_FUNCTIONARGS:
-		functionargs(ast);
-		break;
+		return functionargs(ast);
 	case N_DECLARATION:
-		declaration(ast->child, ast->child->next);
-		break;
+		return declaration(ast->child, ast->child->next);
 	case N_ASSIGNMENT:
-		assignment(ast->child, ast->child->next);
-		break;
+		return assignment(ast->child, ast->child->next);
 	case N_IDENTIFIER:
-		identifier(ast);
-		assert(ast->symbol != NULL);
-		break;
+		return identifier(ast);
 	default:
 		for(Ast *c = ast->child; c != NULL; c = c->next) {
-			annotate_variable_symbols(c);
+			int err = 0;
+			if((err = annotate_variable_symbols(c))) return err;
 		}
 	}
+
+	return 0;
 }
 
 static
-void
+int
 function(Ast *type, Ast *id, Ast *args, Ast *block) {
-	annotate_type_symbol(type);
+	type->symbol = resolve_symbol_recursive(type);
+	if(!type_symbol_ok(type)) {
+		return 1;
+	}
 
-	define_symbol(id, S_FUNCTION);
-	annotate_identifier_symbol(id);
+	if(define_symbol(id, S_FUNCTION)) {
+		return 1;
+	}
+
+	id->symbol = resolve_symbol_recursive(id);
+	if(!identifier_symbol_ok(id)) {
+		return 1;
+	}
 
 	id->symbol->args = args->scope;
 	id->symbol->code = block;
 
 	annotate_return_stmts(block, id->symbol);
 
-	annotate_function_symbols(block);
+	return annotate_function_symbols(block);
 }
 
 static
@@ -104,83 +113,108 @@ annotate_return_stmts(Ast *ast, Symbol *sy) {
 }
 
 static
-void
+int
 functionargs(Ast *fnargs) {
+	int err = 0;
 	for(Ast *c = fnargs->child; c != NULL; c = c->next) {
-		annotate_variable_symbols(c);
+		if((err = annotate_variable_symbols(c))) return err;
 		c->child->next->symbol->assigned = true;
 	}
+
+	return 0;
 }
 
 static
-void
+int
 declaration(Ast *type, Ast *id) {
-	annotate_type_symbol(type);
+	type->symbol = resolve_symbol_recursive(type);
+	if(!type_symbol_ok(type)) {
+		return 1;
+	}
 
-	define_symbol(id, S_VARIABLE);
-	annotate_identifier_symbol(id);
+	if(define_symbol(id, S_VARIABLE)) {
+		return 1;
+	}
+	id->symbol = resolve_symbol_recursive(id);
+	if(!identifier_symbol_ok(id)) {
+		return 1;
+	}
+
+	return 0;
 }
 
 static
-void
+int
 assignment(Ast *id, Ast *expr) {
 	/* check expression first */
-	annotate_variable_symbols(expr);
+	int err = 0;
+	if((err = annotate_variable_symbols(expr))) return err;
 
-	annotate_identifier_symbol(id);
-	assert(id->symbol != NULL);
+	id->symbol = resolve_symbol_recursive(id);
+	if(!identifier_symbol_ok(id)) {
+		return 1;
+	}
 	id->symbol->assigned = true;
+
+	return 0;
 }
 
 static
-void
+int
 identifier(Ast *id) {
-	annotate_identifier_symbol(id);
+	id->symbol = resolve_symbol_recursive(id);
+	if(!identifier_symbol_ok(id)) {
+		return 1;
+	}
 
 	if(id->symbol->class == S_VARIABLE && !id->symbol->assigned) {
 		printf("use of unassigned identifier <%s>!\n", id->value);
 	}
+
+	return 0;
 }
 
 static
-void
-annotate_type_symbol(Ast *type) {
-	type->symbol = resolve_symbol_recursive(type);
+bool
+type_symbol_ok(Ast *type) {
 	if(type->symbol == NULL || type->symbol->class != S_TYPE) {
 		printf("<%s> is not a valid type!\n", type->value);
-		assert(false);
+		return false;
 	}
+	return true;
 }
 
 static
-void
-annotate_identifier_symbol(Ast *id) {
-	id->symbol = resolve_symbol_recursive(id);
+bool
+identifier_symbol_ok(Ast *id) {
 	if(id->symbol == NULL) {
 		printf("<%s> not found!\n", id->value);
-		assert(false);
+		return false;
 	}
+	return true;
 }
 
 static
-void
+int
 define_symbol(const Ast *id, SymbolClass class) {
 	Symbol *sy;
 	/* check if identifier is a reserved word */
 	sy = resolve_symbol_recursive(id);
 	if(sy != NULL && sy->class == S_TYPE) {
 		printf("<%s> is not a valid name!\n", id->value);
-		assert(false);
+		return 1;
 	}
 	/* check if identifier is already defined in the current (!) scope */
 	sy = resolve_symbol(id);
 	if(sy != NULL) {
 		printf("<%s> already defined!\n", id->value);
-		assert(false);
+		return 1;
 	}
 
 	/* define symbol */
 	scope_define(id->scope, symbol_new(class, id->value));
+
+	return 0;
 }
 
 static inline

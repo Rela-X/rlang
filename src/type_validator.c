@@ -6,14 +6,15 @@
 #include "print.h"
 #include "types.h"
 
-static void validate_tree(const Ast *ast);
-static void validate_ifstatement(const Ast *);
-static void validate_whilestatement(const Ast *);
-static void validate_return(const Ast *);
-static void validate_call(const Ast *);
-static void validate_assignment(const Ast *);
-static void validate_relational_expression(const Ast *);
-static bool valid_as_type(Ast *, Type);
+static int validate_tree(const Ast *ast);
+static int validate_ifstatement(const Ast *);
+static int validate_whilestatement(const Ast *);
+static int validate_return(const Ast *);
+static int validate_call(const Ast *);
+static int validate_assignment(const Ast *);
+static int validate_relational_expression(const Ast *);
+static bool valid_as_type(Ast *, const Type);
+static bool expr_type_ok(Ast *, const Type);
 
 static const Type type_promotion_table[NTYPES][NTYPES] = {
                        /* void */ /* boolean */ /* integer */ /* float */ /* String */ /* Set */ /* R */
@@ -26,121 +27,130 @@ static const Type type_promotion_table[NTYPES][NTYPES] = {
         [T_R]      = { T_NONE,    T_NONE,       T_NONE,       T_NONE,     T_NONE,      T_NONE,   T_NONE },
 };
 
-#define expr_check_type(expr, type) do {	\
-	if(!valid_as_type(expr, type)) {	\
-		print_tree(stdout, expr);	\
-		printf(" not a valid as ");	\
-		print_type(stdout, type);	\
-		printf("\n");			\
-	} \
-} while(0)
-
-void
+int
 ast_validate_types(const Ast *ast) {
 	printf("validating type annotations\n");
-	validate_tree(ast);
+	return validate_tree(ast);
 }
 
 static
-void
+int
 validate_tree(const Ast *ast) {
 	switch(ast->class) {
 	case N_IF:
-		validate_ifstatement(ast);
-		break;
+		return validate_ifstatement(ast);
 	case N_WHILE:
-		validate_whilestatement(ast);
-		break;
+		return validate_whilestatement(ast);
 	case N_RETURN:
-		validate_return(ast);
-		break;
+		return validate_return(ast);
 	case N_CALL:
-		validate_call(ast);
-		break;
+		return validate_call(ast);
 	case N_ASSIGNMENT:
-		validate_assignment(ast);
-		break;
+		return validate_assignment(ast);
 	case N_R:
-		validate_relational_expression(ast);
-		break;
+		return validate_relational_expression(ast);
 	default:
 		for(Ast *c = ast->child; c != NULL; c = c->next) {
-			validate_tree(c);
+			int err = 0;
+			if((err = validate_tree(c))) return err;
 		}
 	}
+
+	return 0;
 }
 
 static
-void
+int
 validate_ifstatement(const Ast *if_stmt) {
 	Ast *cond_expr = if_stmt->child;
 //	Ast *then_stmt = if_stmt->child->next;
 //	Ast *else_stmt = if_stmt->child->next->next;
 
-	expr_check_type(cond_expr, T_BOOL);
+	if(!expr_type_ok(cond_expr, T_BOOL)) return 1;
+	return 0;
 }
 
 static
-void
+int
 validate_whilestatement(const Ast *while_stmt) {
 	Ast *cond_expr = while_stmt->child;
 //	Ast *loop_body = while_stmt->child->next;
 
-	expr_check_type(cond_expr, T_BOOL);
+	if(!expr_type_ok(cond_expr, T_BOOL)) return 1;
+	return 0;
 }
 
 static
-void
+int
 validate_return(const Ast *return_stmt) {
 	Ast *expr = return_stmt->child;
 
-	expr_check_type(expr, return_stmt->eval_type);
+	if(!expr_type_ok(expr, return_stmt->eval_type)) return 1;
+	return 0;
 }
 
 static
-void
+int
 validate_call(const Ast *call) {
 	Ast *id = call->child;
 	Ast *cargs = call->child->next;
 
 	Ast *carg = cargs->child;
 	Symbol *farg = id->symbol->args->symbols;
+	int err = 0;
 	for(;carg != NULL && farg != NULL; carg = carg->next, farg = farg->next) {
-		expr_check_type(carg, farg->eval_type);
+		err |= !expr_type_ok(carg, farg->eval_type);
 	}
 	if(carg != NULL || farg != NULL) {
 		print_tree(stdout, call);
 		printf(" has invalid number of args\n");
+		err |= 1;
 	}
+
+	return err;
 }
 
 static
-void
+int
 validate_assignment(const Ast *assignment) {
 	Ast *id = assignment->child;
 	Ast *expr = assignment->child->next;
 
-	expr_check_type(expr, id->eval_type);
+	if(!expr_type_ok(expr, id->eval_type)) return 1;
+	return 0;
 }
 
 static
-void
+int
 validate_relational_expression(const Ast *relation) {
 	Ast *domain1 = relation->child;
 	Ast *domain2 = relation->child->next;
 //	Ast *rtable = relation->child->next->next;
 
-	expr_check_type(domain1, T_SET);
-	expr_check_type(domain2, T_SET);
+	if(!expr_type_ok(domain1, T_SET)) return 1;
+	if(!expr_type_ok(domain2, T_SET)) return 1;
+	return 0;
 }
 
 static inline
 bool
-valid_as_type(Ast *ast, const Type t) {
-	if(ast->eval_type == t)
+valid_as_type(Ast *expr, const Type t) {
+	if(expr->eval_type == t)
 		return true;
-	ast->promoted_type = type_promotion_table[ast->eval_type][t];
+	expr->promoted_type = type_promotion_table[expr->eval_type][t];
 
-	return ast->promoted_type == t;
+	return expr->promoted_type == t;
 }
 
+static
+bool
+expr_type_ok(Ast *expr, const Type t) {
+	if(!valid_as_type(expr, t)) {
+		print_tree(stdout, expr);
+		printf(" not a valid as ");
+		print_type(stdout, t);
+		printf("\n");
+		return false;
+	}
+	return true;
+}
