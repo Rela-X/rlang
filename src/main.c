@@ -46,11 +46,9 @@ main() {
 		goto exit;
 	}
 
-	printf("### AST:\n\n");
+	dprintf(2, "### AST:\n");
 	pt(root);
-	printf("\n");
-
-	printf("### Log:\n\n");
+	dprintf(2, "\n");
 
 	Scope *builtin_scope = scope_new(NULL);
 	init_builtin_types(builtin_scope);

@@ -68,8 +68,6 @@ static const Type relational_result_type_table[NTYPES][NTYPES] = {
 
 void
 ast_annotate_types(Ast *ast) {
-	printf("setting type annotations\n");
-
 	annotate_symbol_types(ast);
 	annotate_expr_types(ast);
 

@@ -48,7 +48,8 @@ static char *type_name_table[] = {
 	[T_R] = "Relation",
 };
 
-void print_node(FILE *f, const Ast *ast) {
+void
+dprint_node(int fd, const Ast *ast) {
 	assert(ast != NULL);
 
 	switch(ast->class) {
@@ -57,62 +58,62 @@ void print_node(FILE *f, const Ast *ast) {
 	case N_INTEGER:
 	case N_FLOAT:
 	case N_STRING:
-		fprintf(f, "%s", ast->value);
+		dprintf(fd, "%s", ast->value);
 		break;
 	case N_SET:
-		fprintf(f, "{");
+		dprintf(fd, "{");
 		for(Ast *c = ast->child; c != NULL; c = c->next) {
-			fprintf(f, " ");
-			print_node(f, c);
+			dprintf(fd, " ");
+			dprint_node(fd, c);
 		}
-		fprintf(f, " ");
-		fprintf(f, "}");
+		dprintf(fd, " ");
+		dprintf(fd, "}");
 		break;
 	case N_R:
-		fprintf(f, "[RELATION]");
+		dprintf(fd, "[RELATION]");
 		break;
 	default:
 		if(ast->class >= len(node_name_table)) {
-			fprintf(f, "%s:%d:%s TODO %d", __FILE__, __LINE__, __func__, ast->class);
+			dprintf(fd, "%s:%d:%s TODO %d", __FILE__, __LINE__, __func__, ast->class);
 			return;
 		}
-		fprintf(f, "%s", node_name_table[ast->class]);
+		dprintf(fd, "%s", node_name_table[ast->class]);
 	}
 }
 
 void
-print_node_symbolinfo(FILE *f, const Ast *ast) {
+dprint_node_symbolinfo(int fd, const Ast *ast) {
 	assert(ast != NULL);
 
-	print_node(f, ast);
+	dprint_node(fd, ast);
 
 	Symbol *symbol = ast->symbol;
 	assert(symbol != NULL);
 
-	fprintf(f, " has symbol <%s> ", symbol->name);
-	fprintf(f, "(");
-	fprintf(f, "assigned=%s|", (symbol->assigned) ? "yes" : "NO!");
-	fprintf(f, "read=%s", (symbol->read) ? "yes" : "NO!");
-	fprintf(f, ")");
+	dprintf(fd, " has symbol <%s> ", symbol->name);
+	dprintf(fd, "(");
+	dprintf(fd, "assigned=%s|", (symbol->assigned) ? "yes" : "NO!");
+	dprintf(fd, "read=%s", (symbol->read) ? "yes" : "NO!");
+	dprintf(fd, ")");
 }
 
 void
-print_node_typeinfo(FILE *f, const Ast *ast) {
+dprint_node_typeinfo(int fd, const Ast *ast) {
 	assert(ast != NULL);
 
-	print_node(f, ast);
-	fprintf(f, " has type ");
-	print_type(f, ast->eval_type);
+	dprint_node(fd, ast);
+	dprintf(fd, " has type ");
+	dprint_type(fd, ast->eval_type);
 	if(ast->promoted_type != T_NONE) {
-		fprintf(f, "(promoted to ");
-		print_type(f, ast->promoted_type);
-		fprintf(f, ")");
+		dprintf(fd, "(promoted to ");
+		dprint_type(fd, ast->promoted_type);
+		dprintf(fd, ")");
 	}
 }
 
 
 void
-print_tree(FILE *f, const Ast *ast) {
+dprint_tree(int fd, const Ast *ast) {
 	assert(ast != NULL);
 
 	switch(ast->class) {
@@ -123,98 +124,98 @@ print_tree(FILE *f, const Ast *ast) {
 	case N_STRING:
 	case N_SET:
 	case N_R:
-		print_node(f, ast);
+		dprint_node(fd, ast);
 		return; // no children
 	default:
 		;
 	}
 
-	fprintf(f, "(");
-	print_node(f, ast);
+	dprintf(fd, "(");
+	dprint_node(fd, ast);
 	for(Ast *c = ast->child; c != NULL; c = c->next) {
-		fprintf(f, " ");
-		print_tree(f, c);
+		dprintf(fd, " ");
+		dprint_tree(fd, c);
 	}
-	fprintf(f, ")");
+	dprintf(fd, ")");
 }
 
 void
-print_tree_symbolinfo(FILE *f, const Ast *ast) {
+dprint_tree_symbolinfo(int fd, const Ast *ast) {
 	assert(ast != NULL);
 
 	if(ast->symbol != NULL) {
-		print_node_symbolinfo(f, ast);
-		fprintf(f, "\n");
+		dprint_node_symbolinfo(fd, ast);
+		dprintf(fd, "\n");
 	}
 	for(Ast *c = ast->child; c != NULL; c = c->next) {
-		print_tree_symbolinfo(f, c);
+		dprint_tree_symbolinfo(fd, c);
 	}
 }
 
 void
-print_tree_typeinfo(FILE *f, const Ast *ast) {
+dprint_tree_typeinfo(int fd, const Ast *ast) {
 	assert(ast != NULL);
 
-	print_node_typeinfo(f, ast);
-	fprintf(f, "\n");
+	dprint_node_typeinfo(fd, ast);
+	dprintf(fd, "\n");
 	for(Ast *c = ast->child; c != NULL; c = c->next) {
-		print_tree_typeinfo(f, c);
+		dprint_tree_typeinfo(fd, c);
 	}
 }
 
 void
-print_type(FILE *f, const Type type) {
-	fprintf(f, "type(%d)", type);
+dprint_type(int fd, const Type type) {
+	dprintf(fd, "type(%d)", type);
 
 	assert(type >= 0);
 	assert(type < len(type_name_table));
 
-	fprintf(f, " => %s", type_name_table[type]);
+	dprintf(fd, " => %s", type_name_table[type]);
 }
 
 void
-print_value(FILE *f, const Value *value) {
+dprint_value(int fd, const Value *value) {
 	assert(value != NULL);
 
-	fprintf(f, "<");
+	dprintf(fd, "<");
 
 	if(value->type > 0 && value->type < len(type_name_table)) {
-		fprintf(f, "%s", type_name_table[value->type]);
+		dprintf(fd, "%s", type_name_table[value->type]);
 	} else if(value->type == T_VOID ){
-		fprintf(f, "void>");
+		dprintf(fd, "void>");
 		return;
 	} else {
-		fprintf(f, "%d", value->type);
+		dprintf(fd, "%d", value->type);
 	}
 
-	fprintf(f, ":");
+	dprintf(fd, ":");
 
 	switch(value->type) {
 	case T_BOOL:
-		fprintf(f, "%s", (value->as_bool) ? "true" : "false");
+		dprintf(fd, "%s", (value->as_bool) ? "true" : "false");
 		break;
 	case T_INT:
-		fprintf(f, "%d", value->as_int);
+		dprintf(fd, "%d", value->as_int);
 		break;
 	case T_FLOAT:
-		fprintf(f, "%f", value->as_float);
+		dprintf(fd, "%f", value->as_float);
 		break;
 	case T_STRING:
-		fprintf(f, "%s", value->as_String);
+		dprintf(fd, "%s", value->as_String);
 		break;
 	case T_SET: {
 		char *str = rf_set_to_string(value->as_Set);
-		fprintf(f, "%s", str);
+		dprintf(fd, "%s", str);
 		free(str);
 		} break;
 	case T_R: {
 		char *str = rf_relation_to_string(value->as_Relation);
-		fprintf(f, "%s", str);
+		dprintf(fd, "%s", str);
 		free(str);
 		} break;
 	default:
-		fprintf(f, "%s:%d:%s TODO ", __FILE__, __LINE__, __func__);
-		print_type(f, value->type);
+		dprintf(fd, "%s:%d:%s TODO ", __FILE__, __LINE__, __func__);
+		dprint_type(fd, value->type);
 	}
-	fprintf(f, ">");
+	dprintf(fd, ">");
 }

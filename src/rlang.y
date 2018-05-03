@@ -13,7 +13,7 @@ int yylex(YYSTYPE *, YYLTYPE *);
 
 void
 yyerror(YYLTYPE *yyllocp, Ast **ast, const char *yymsg) {
-	printf("my_yyerror at %d:%d-%d:%d %s\n",
+	dprintf(2, "[ERROR@%d:%d-%d:%d] %s\n",
 		yyllocp->first_line,
 		yyllocp->first_column,
 		yyllocp->last_line,
@@ -33,10 +33,9 @@ yyerror(YYLTYPE *yyllocp, Ast **ast, const char *yymsg) {
         char *value;
 }
 
-%printer { print_node(yyoutput, $$); } <node>
-%printer { fprintf(yyoutput, "%s", $$); } <value>
+%printer { dprint_node(fileno(yyoutput), $$); } <node>
+%printer { dprintf(fileno(yyoutput), "%s", $$); } <value>
 
-%destructor { } <*>
 %destructor { free($$); } <value>
 %destructor { ast_free($$); } <node>
 

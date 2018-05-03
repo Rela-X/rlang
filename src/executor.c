@@ -50,12 +50,7 @@ static Value *callstack_returnvalue = NULL;
 
 void
 ast_execute(const Ast *ast) {
-	printf("executing program\n");
-	printf("\n");
-
 	exec(ast);
-
-	printf("\n");
 }
 
 static
@@ -108,7 +103,7 @@ exec(const Ast *ast) {
 	case N_SET:
 	case N_R:
 		v = eval(ast);
-//do { print_tree(stdout, ast); printf(" evaluates to "); pv(v); } while(0);
+//do { print_tree(2, ast); dprintf(2, " evaluates to "); pv(v); } while(0);
 		value_free(v);
 		return;
 	}

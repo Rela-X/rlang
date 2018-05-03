@@ -28,7 +28,5 @@ walk_tree(Ast *ast) {
 
 void
 ast_cleanup(Ast *ast) {
-	printf("freeing ast metadata\n");
-
 	walk_tree(ast);
 }

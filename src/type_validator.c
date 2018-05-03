@@ -29,7 +29,6 @@ static const Type type_promotion_table[NTYPES][NTYPES] = {
 
 int
 ast_validate_types(const Ast *ast) {
-	printf("validating type annotations\n");
 	return validate_tree(ast);
 }
 
@@ -102,8 +101,8 @@ validate_call(const Ast *call) {
 		err |= !expr_type_ok(carg, farg->eval_type);
 	}
 	if(carg != NULL || farg != NULL) {
-		print_tree(stdout, call);
-		printf(" has invalid number of args\n");
+		dprint_tree(2, call);
+		dprintf(2, " has invalid number of args\n");
 		err |= 1;
 	}
 
@@ -146,10 +145,10 @@ static
 bool
 expr_type_ok(Ast *expr, const Type t) {
 	if(!valid_as_type(expr, t)) {
-		print_tree(stdout, expr);
-		printf(" not a valid as ");
-		print_type(stdout, t);
-		printf("\n");
+		dprint_tree(2, expr);
+		dprintf(2, " not a valid as ");
+		dprint_type(2, t);
+		dprintf(2, "\n");
 		return false;
 	}
 	return true;

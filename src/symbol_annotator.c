@@ -168,7 +168,7 @@ identifier(Ast *id) {
 	}
 
 	if(id->symbol->class == S_VARIABLE && !id->symbol->assigned) {
-		printf("use of unassigned identifier <%s>!\n", id->value);
+		dprintf(2, "use of unassigned identifier <%s>!\n", id->value);
 	}
 
 	return 0;
@@ -178,7 +178,7 @@ static
 bool
 type_symbol_ok(Ast *type) {
 	if(type->symbol == NULL || type->symbol->class != S_TYPE) {
-		printf("<%s> is not a valid type!\n", type->value);
+		dprintf(2, "<%s> is not a valid type!\n", type->value);
 		return false;
 	}
 	return true;
@@ -188,7 +188,7 @@ static
 bool
 identifier_symbol_ok(Ast *id) {
 	if(id->symbol == NULL) {
-		printf("<%s> not found!\n", id->value);
+		dprintf(2, "<%s> not found!\n", id->value);
 		return false;
 	}
 	return true;
@@ -201,13 +201,13 @@ define_symbol(const Ast *id, SymbolClass class) {
 	/* check if identifier is a reserved word */
 	sy = resolve_symbol_recursive(id);
 	if(sy != NULL && sy->class == S_TYPE) {
-		printf("<%s> is not a valid name!\n", id->value);
+		dprintf(2, "<%s> is not a valid name!\n", id->value);
 		return 1;
 	}
 	/* check if identifier is already defined in the current (!) scope */
 	sy = resolve_symbol(id);
 	if(sy != NULL) {
-		printf("<%s> already defined!\n", id->value);
+		dprintf(2, "<%s> already defined!\n", id->value);
 		return 1;
 	}
 
