@@ -21,21 +21,21 @@ typedef enum _node_class NodeClass;
 
 typedef struct _ast Ast;
 struct _ast {
-        NodeClass       class;
-        /** node value. May be NULL */
-        char            *value;
-        /** linked list of child nodes */
-        Ast             *child;
-        /** next sibling in linked list */
-        Ast             *next;
+	NodeClass       class;
+	/** node value. May be NULL */
+	char            *value;
+	/** linked list of child nodes */
+	Ast             *child;
+	/** next sibling in linked list */
+	Ast             *next;
 
-        /** which scope does the node belong to */
-        Scope           *scope;
-        /** the symbol associated with this node. May be null */
-        Symbol          *symbol;
-        /** which type does the node evaluate to. Initialized as -1 */
-        Type            eval_type;
-        Type            promoted_type;
+	/** which scope does the node belong to */
+	Scope           *scope;
+	/** the symbol associated with this node. May be null */
+	Symbol          *symbol;
+	/** which type does the node evaluate to. Initialized as -1 */
+	Type            eval_type;
+	Type            promoted_type;
 };
 
 Ast *  ast_new(NodeClass type);
