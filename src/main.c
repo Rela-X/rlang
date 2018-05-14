@@ -47,10 +47,6 @@ main() {
 		goto exit;
 	}
 
-	dprintf(2, "### AST:\n");
-	pt(root);
-	dprintf(2, "\n");
-
 	Scope *builtin_scope = scope_new(NULL);
 	init_builtin_types(builtin_scope);
 	init_builtin_functions(builtin_scope);
