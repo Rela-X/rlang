@@ -101,8 +101,8 @@ validate_call(const Ast *call) {
 		err |= !expr_type_ok(carg, farg->eval_type);
 	}
 	if(carg != NULL || farg != NULL) {
+		err_at(&call->location, "function-call has invalid number of args");
 		dprint_tree(2, call);
-		dprintf(2, " has invalid number of args\n");
 		err |= 1;
 	}
 
@@ -145,6 +145,7 @@ static
 bool
 expr_type_ok(Ast *expr, const Type t) {
 	if(!valid_as_type(expr, t)) {
+		err_at(&expr->location, "invalid type");
 		dprint_tree(2, expr);
 		dprintf(2, " not a valid as ");
 		dprint_type(2, t);

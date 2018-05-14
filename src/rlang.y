@@ -1,4 +1,8 @@
 %{
+struct _ast;
+
+#include "rlang.tab.h"
+
 #include <stdio.h>
 
 #include "ast.h"
@@ -7,29 +11,21 @@
 #define YYERROR_VERBOSE 1
 #define YYDEBUG 1
 
-#include "rlang.tab.h"
-
 int yylex(YYSTYPE *, YYLTYPE *);
 
 void
-yyerror(YYLTYPE *yyllocp, Ast **ast, const char *yymsg) {
-	dprintf(2, "[ERROR@%d:%d-%d:%d] %s\n",
-		yyllocp->first_line,
-		yyllocp->first_column,
-		yyllocp->last_line,
-		yyllocp->last_column,
-		yymsg
-	);
+yyerror(YYLTYPE *yyllocp, struct _ast **ast, const char *yymsg) {
+	err_at(yyllocp, yymsg);
 }
 
 %}
 
 %locations
 %define api.pure
-%parse-param {Ast **ast}
+%parse-param {struct _ast **ast}
 
 %union {
-        Ast *node;
+        struct _ast *node;
         char *value;
 }
 
@@ -84,7 +80,7 @@ yyerror(YYLTYPE *yyllocp, Ast **ast, const char *yymsg) {
 program         : statements                    { $$ = $1; *ast = ast_clone($$); }
                 ;
 
-statements      : statement                     { $$ = ast_new(N_BLOCK); ast_append_child($$, $1); }
+statements      : statement                     { $$ = ast_new(N_BLOCK); $$->location = @$; ast_append_child($$, $1); }
                 | statements statement          { ast_append_child($1, $2); }
                 ;
 
@@ -93,41 +89,41 @@ statement       : block
                 | if
                 | while
                 | expr SEMICOLON
-                | RETURN expr SEMICOLON         { $$ = ast_new(N_RETURN); ast_append_child($$, $2); }
+                | RETURN expr SEMICOLON         { $$ = ast_new(N_RETURN); $$->location = @$; ast_append_child($$, $2); }
                 ;
 
 block           : LBRACE statements RBRACE      { $$ = $2; }
                 ;
 
-declaration     : vardecl ASSIGN expr SEMICOLON         { $1->next = ast_new(N_ASSIGNMENT); ast_append_child_all($1->next, ast_clone($1->child->next), $3); }
+declaration     : vardecl ASSIGN expr SEMICOLON         { $1->next = ast_new(N_ASSIGNMENT); $$->location = @$; ast_append_child_all($1->next, ast_clone($1->child->next), $3); }
                 | vardecl SEMICOLON
                 | function
                 ;
 
-if              : IF expr statement ELSE statement      { $$ = ast_new(N_IF); ast_append_child_all($$, $2, $3, $5); }
-                | IF expr statement                     { $$ = ast_new(N_IF); ast_append_child_all($$, $2, $3); }
+if              : IF expr statement ELSE statement      { $$ = ast_new(N_IF); $$->location = @$; ast_append_child_all($$, $2, $3, $5); }
+                | IF expr statement                     { $$ = ast_new(N_IF); $$->location = @$; ast_append_child_all($$, $2, $3); }
                 ;
 
-while           : WHILE expr statement                  { $$ = ast_new(N_WHILE); ast_append_child_all($$, $2, $3); }
+while           : WHILE expr statement                  { $$ = ast_new(N_WHILE); $$->location = @$; ast_append_child_all($$, $2, $3); }
                 ;
 
-function        : identifier identifier LPAREN function_args RPAREN block { $$ = ast_new(N_FUNCTION); ast_append_child_all($$, $1, $2, $4, $6); }
+function        : identifier identifier LPAREN function_args RPAREN block { $$ = ast_new(N_FUNCTION); $$->location = @$; ast_append_child_all($$, $1, $2, $4, $6); }
                 ;
 
-function_args   : /* empty */                   { $$ = ast_new(N_FUNCTIONARGS); }
-                | vardecl                       { $$ = ast_new(N_FUNCTIONARGS); ast_append_child($$, $1); }
+function_args   : /* empty */                   { $$ = ast_new(N_FUNCTIONARGS); $$->location = @$; }
+                | vardecl                       { $$ = ast_new(N_FUNCTIONARGS); $$->location = @$; ast_append_child($$, $1); }
                 | function_args COMMA vardecl   { ast_append_child($1, $3); }
                 ;
 
-vardecl         : identifier identifier                 { $$ = ast_new(N_DECLARATION); ast_append_child_all($$, $1, $2); }
+vardecl         : identifier identifier                 { $$ = ast_new(N_DECLARATION); $$->location = @$; ast_append_child_all($$, $1, $2); }
                 ;
 
 expr            : LPAREN expr RPAREN            { $$ = $2; }
                 | call_expr
                 | assign_expr
                 | identifier
-                | NOT expr                      { $$ = ast_new(N_NOT); ast_append_child($$, $2); }
-                | SUB expr %prec NEG            { $$ = ast_new(N_NEG); ast_append_child($$, $2); }
+                | NOT expr                      { $$ = ast_new(N_NOT); $$->location = @$; ast_append_child($$, $2); }
+                | SUB expr %prec NEG            { $$ = ast_new(N_NEG); $$->location = @$; ast_append_child($$, $2); }
                 | expr boolean_op expr          { $$ = $2; ast_append_child_all($$, $1, $3); }
                 | expr arithmetic_comp expr     { $$ = $2; ast_append_child_all($$, $1, $3); }
                 | expr arithmetic_op expr       { $$ = $2; ast_append_child_all($$, $1, $3); }
@@ -136,52 +132,52 @@ expr            : LPAREN expr RPAREN            { $$ = $2; }
                 | relation
                 ;
 
-call_expr       : identifier LPAREN call_args RPAREN    { $$ = ast_new(N_CALL); ast_append_child_all($$, $1, $3); }
+call_expr       : identifier LPAREN call_args RPAREN    { $$ = ast_new(N_CALL); $$->location = @$; ast_append_child_all($$, $1, $3); }
                 ;
 
-call_args       : /* empty */                           { $$ = ast_new(N_CALLARGS); }
-                | expr                                  { $$ = ast_new(N_CALLARGS); ast_append_child($$, $1); }
+call_args       : /* empty */                           { $$ = ast_new(N_CALLARGS); $$->location = @$; }
+                | expr                                  { $$ = ast_new(N_CALLARGS); $$->location = @$; ast_append_child($$, $1); }
                 | call_args COMMA expr                  { ast_append_child($1, $3); }
                 ;
 
-assign_expr     : identifier ASSIGN expr                { $$ = ast_new(N_ASSIGNMENT); ast_append_child_all($$, $1, $3); }
+assign_expr     : identifier ASSIGN expr                { $$ = ast_new(N_ASSIGNMENT); $$->location = @$; ast_append_child_all($$, $1, $3); }
                 ;
 
-identifier      : IDENTIFIER                    { $$ = ast_new(N_IDENTIFIER); $$->value = $1; }
+identifier      : IDENTIFIER                    { $$ = ast_new(N_IDENTIFIER); $$->location = @$; $$->value = $1; }
                 ;
 
-boolean_op      : EQ    { $$ = ast_new(N_EQ); }
-                | NEQ   { $$ = ast_new(N_NEQ); }
-                | AND   { $$ = ast_new(N_AND); }
-                | IOR   { $$ = ast_new(N_IOR); }
-                | XOR   { $$ = ast_new(N_XOR); }
+boolean_op      : EQ    { $$ = ast_new(N_EQ); $$->location = @$; }
+                | NEQ   { $$ = ast_new(N_NEQ); $$->location = @$; }
+                | AND   { $$ = ast_new(N_AND); $$->location = @$; }
+                | IOR   { $$ = ast_new(N_IOR); $$->location = @$; }
+                | XOR   { $$ = ast_new(N_XOR); $$->location = @$; }
                 ;
-arithmetic_comp : LT    { $$ = ast_new(N_LT); }
-                | LE    { $$ = ast_new(N_LE); }
-                | GE    { $$ = ast_new(N_GE); }
-                | GT    { $$ = ast_new(N_GT); }
+arithmetic_comp : LT    { $$ = ast_new(N_LT); $$->location = @$; }
+                | LE    { $$ = ast_new(N_LE); $$->location = @$; }
+                | GE    { $$ = ast_new(N_GE); $$->location = @$; }
+                | GT    { $$ = ast_new(N_GT); $$->location = @$; }
                 ;
-arithmetic_op   : ADD   { $$ = ast_new(N_ADD); }
-                | SUB   { $$ = ast_new(N_SUB); }
-                | MUL   { $$ = ast_new(N_MUL); }
-                | DIV   { $$ = ast_new(N_DIV); }
-                | POW   { $$ = ast_new(N_POW); }
-                | MOD   { $$ = ast_new(N_MOD); }
-                ;
-
-value           : BOOLEAN                       { $$ = ast_new(N_BOOLEAN); $$->value = $1; }
-                | INTEGER                       { $$ = ast_new(N_INTEGER); $$->value = $1; }
-                | FLOAT                         { $$ = ast_new(N_FLOAT); $$->value = $1; }
-                | STRING                        { $$ = ast_new(N_STRING); $$->value = $1; }
+arithmetic_op   : ADD   { $$ = ast_new(N_ADD); $$->location = @$; }
+                | SUB   { $$ = ast_new(N_SUB); $$->location = @$; }
+                | MUL   { $$ = ast_new(N_MUL); $$->location = @$; }
+                | DIV   { $$ = ast_new(N_DIV); $$->location = @$; }
+                | POW   { $$ = ast_new(N_POW); $$->location = @$; }
+                | MOD   { $$ = ast_new(N_MOD); $$->location = @$; }
                 ;
 
-relation        : expr IDENTIFIER expr COLON rtable       { if($2[0] != 'x' || $2[1] != '\0') YYABORT; free($2); $$ = ast_new(N_R); ast_append_child_all($$, $1, $3, $5); }
+value           : BOOLEAN                       { $$ = ast_new(N_BOOLEAN); $$->location = @$; $$->value = $1; }
+                | INTEGER                       { $$ = ast_new(N_INTEGER); $$->location = @$; $$->value = $1; }
+                | FLOAT                         { $$ = ast_new(N_FLOAT); $$->location = @$; $$->value = $1; }
+                | STRING                        { $$ = ast_new(N_STRING); $$->location = @$; $$->value = $1; }
+                ;
+
+relation        : expr IDENTIFIER expr COLON rtable       { if($2[0] != 'x' || $2[1] != '\0') YYABORT; free($2); $$ = ast_new(N_R); $$->location = @$; ast_append_child_all($$, $1, $3, $5); }
                 ;
 
 set             : LBRACE set_elements RBRACE    { $$ = $2; }
                 ;
 
-set_elements    : /* empty */                   { $$ = ast_new(N_SET); }
+set_elements    : /* empty */                   { $$ = ast_new(N_SET); $$->location = @$; }
                 | set_elements set_element      { ast_append_child($1, $2); }
                 ;
 
@@ -193,11 +189,11 @@ set_element     : value                         { $1->class = N_STRING; }
 rtable          : LBRACKET rtable_rows RBRACKET         { $$ = $2; }
                 ;
 
-rtable_rows     : rtable_row                            { $$ = ast_new(N_RTABLE); ast_append_child($$, $1); }
+rtable_rows     : rtable_row                            { $$ = ast_new(N_RTABLE); $$->location = @$; ast_append_child($$, $1); }
                 | rtable_rows VBAR VBAR rtable_row      { ast_append_child($1, $4); }
                 ;
 
-rtable_row      : value                                 { $$ = ast_new(N_RTABLEROW); ast_append_child($$, $1); }
+rtable_row      : value                                 { $$ = ast_new(N_RTABLEROW); $$->location = @$; ast_append_child($$, $1); }
                 | rtable_row value                      { ast_append_child($1, $2); }
                 ;
 

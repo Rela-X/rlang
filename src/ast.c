@@ -14,6 +14,11 @@ ast_new(NodeClass c) {
 	m->value = NULL;
 	m->child = NULL;
 
+	m->location.first_line   = -1;
+	m->location.first_column = -1;
+	m->location.last_line    = -1;
+	m->location.last_column  = -1;
+
 	m->scope = NULL;
 
 	m->symbol = NULL;
@@ -36,6 +41,8 @@ ast_clone(const Ast *ast) {
 
 	if(ast->value != NULL)
 		cpy->value = strdup(ast->value);
+
+	cpy->location = ast->location;
 
 	for(Ast *c = ast->child; c != NULL; c = c->next) {
 		Ast *ccpy = ast_clone(c);

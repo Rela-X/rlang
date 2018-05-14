@@ -1,6 +1,8 @@
 #ifndef _AST_H
 #define _AST_H
 
+#include "rlang.tab.h"
+
 #include "scope.h"
 #include "symbol.h"
 #include "types.h"
@@ -28,6 +30,9 @@ struct _ast {
 	Ast             *child;
 	/** next sibling in linked list */
 	Ast             *next;
+
+	/** source-code location, initialized { -1,-1,-1,-1 } */
+	YYLTYPE		location;
 
 	/** which scope does the node belong to */
 	Scope           *scope;

@@ -1,7 +1,10 @@
 #ifndef _PRINT_H
 #define _PRINT_H
 
+#include "rlang.tab.h"
+
 #include <stdio.h>
+#include <stdarg.h>
 
 #include "ast.h"
 #include "value.h"
@@ -22,7 +25,9 @@
 
 #endif
 
-#define msg(...)	dprintf(2, __VA_ARGS__)
+#define log(...)	dprintf(2, __VA_ARGS__)
+void err(const char *format, ...);
+void err_at(const YYLTYPE *yyloc, const char *format, ...);
 
 #define print_node(AST)         dprint_node(2, AST)
 #define print_node_symbol(AST)  dprint_node_symbol(2, AST)

@@ -49,6 +49,38 @@ static char *type_name_table[] = {
 };
 
 void
+err(const char *fmt, ...) {
+	char fmt_pretty[1024];
+
+	snprintf(fmt_pretty, sizeof(fmt_pretty), "[ERROR] %s\n",
+		 fmt
+	);
+
+	va_list args;
+	va_start(args, fmt);
+	vdprintf(2, fmt_pretty, args);
+	va_end(args);
+}
+
+void
+err_at(const YYLTYPE *yyllocp, const char *fmt, ...) {
+	char fmt_pretty[1024];
+
+	snprintf(fmt_pretty, sizeof(fmt_pretty), "[ERROR@%d:%d-%d:%d] %s\n",
+		yyllocp->first_line,
+		yyllocp->first_column,
+		yyllocp->last_line,
+		yyllocp->last_column,
+		fmt
+	);
+
+	va_list args;
+	va_start(args, fmt);
+	vdprintf(2, fmt_pretty, args);
+	va_end(args);
+}
+
+void
 dprint_node(int fd, const Ast *ast) {
 	assert(ast != NULL);
 
