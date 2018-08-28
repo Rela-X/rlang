@@ -743,7 +743,7 @@ _relation(const Ast *expr) {
 		v1->as_Set,
 		v2->as_Set,
 	};
-	int table_size = domains[0]->cardinality * domains[1]->cardinality;
+	int table_size = rf_set_get_cardinality(domains[0]) * rf_set_get_cardinality(domains[1]);
 	bool *table = calloc(table_size, sizeof(*table));
 	int i = 0;
 	for(Ast *rtable_row = rtable->child; rtable_row != NULL; rtable_row = rtable_row->next) {
@@ -751,7 +751,7 @@ _relation(const Ast *expr) {
 			assert(i < table_size);
 			table[i++] = rtable_cell->value[0] == '1';
 		}
-		assert(i % domains[0]->cardinality == 0);
+		assert(i % rf_set_get_cardinality(domains[0]) == 0);
 	}
 
 	value_set_relation(rval, rf_relation_new(domains[0], domains[1], table));

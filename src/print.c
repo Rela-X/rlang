@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <assert.h>
 
-#include <relafix/text_io.h>
+#include "relafix.h"
 
 #include "print.h"
 #include "types.h"
