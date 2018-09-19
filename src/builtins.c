@@ -124,7 +124,9 @@ builtin_set2str(Scope *args, MemorySpace *memspace) {
 	};
 	Value *rval = value_new();
 
-	value_set_string(rval, rf_set_to_string(arg[0]->as_Set));
+	char *buf = rf_set_to_string(arg[0]->as_Set);
+	value_set_string(rval, strdup(buf));
+	rf_string_free(buf);
 
 	return rval;
 }
@@ -137,7 +139,9 @@ builtin_r2str(Scope *args, MemorySpace *memspace) {
 	};
 	Value *rval = value_new();
 
-	value_set_string(rval, rf_relation_to_string(arg[0]->as_Relation));
+	char *buf = rf_relation_to_string(arg[0]->as_Relation);
+	value_set_string(rval, strdup(buf));
+	rf_string_free(buf);
 
 	return rval;
 }

@@ -238,12 +238,12 @@ dprint_value(int fd, const Value *value) {
 	case T_SET: {
 		char *str = rf_set_to_string(value->as_Set);
 		dprintf(fd, "%s", str);
-		free(str);
+		rf_string_free(str);
 		} break;
 	case T_R: {
 		char *str = rf_relation_to_string(value->as_Relation);
 		dprintf(fd, "%s", str);
-		free(str);
+		rf_string_free(str);
 		} break;
 	default:
 		dprintf(fd, "%s:%d:%s TODO ", __FILE__, __LINE__, __func__);
