@@ -379,7 +379,7 @@ _eq(const Ast *expr) {
 			value_set_bool(rval, rf_set_equal(v1->as_Set, v2->as_Set));
 			break;
 		case T_R:
-			value_set_bool(rval, false); // TODO
+			value_set_bool(rval, rf_relation_equal(v1->as_Relation, v2->as_Relation));
 			break;
 		}
 	}
