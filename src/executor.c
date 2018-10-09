@@ -744,7 +744,7 @@ _relation(const Ast *expr) {
 		v2->as_Set,
 	};
 	int table_size = rf_set_get_cardinality(domains[0]) * rf_set_get_cardinality(domains[1]);
-	bool *table = calloc(table_size, sizeof(*table));
+	bool table[table_size];
 	int i = 0;
 	for(Ast *rtable_row = rtable->child; rtable_row != NULL; rtable_row = rtable_row->next) {
 		for(Ast *rtable_cell = rtable_row->child; rtable_cell != NULL; rtable_cell = rtable_cell->next) {
