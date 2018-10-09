@@ -67,6 +67,20 @@ builtin_print(Scope *args, MemorySpace *memspace) {
 	};
 	Value *rval = value_new();
 
+	printf("%s", arg[0]->as_String);
+	value_set_void(rval);
+
+	return rval;
+}
+
+static
+Value *
+builtin_println(Scope *args, MemorySpace *memspace) {
+	Value *arg[] = {
+		get_value_by_name(args, memspace, "0"),
+	};
+	Value *rval = value_new();
+
 	printf("%s\n", arg[0]->as_String);
 	value_set_void(rval);
 
@@ -507,6 +521,7 @@ void
 init_builtin_functions(Scope *builtin_scope) {
 	/* basic functions */
 	def_function(T_VOID, "print", &builtin_print, T_STRING);
+	def_function(T_VOID, "println", &builtin_println, T_STRING);
 
 	/* conversion functions */
 	def_function(T_STRING, "bool2str", &builtin_bool2str, T_BOOL);
