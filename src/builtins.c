@@ -162,6 +162,21 @@ builtin_r2str(Scope *args, MemorySpace *memspace) {
 
 static
 Value *
+builtin_r2tex(Scope *args, MemorySpace *memspace) {
+	Value *arg[] = {
+		get_value_by_name(args, memspace, "0"),
+	};
+	Value *rval = value_new();
+
+	char *buf = rf_relation_format_tex(arg[0]->as_Relation);
+	value_set_string(rval, strdup(buf));
+	rf_string_free(buf);
+
+	return rval;
+}
+
+static
+Value *
 builtin_set_new_intersection(Scope *args, MemorySpace *memspace) {
 	Value *arg[] = {
 		get_value_by_name(args, memspace, "0"),
@@ -529,6 +544,8 @@ init_builtin_functions(Scope *builtin_scope) {
 	def_function(T_STRING, "float2str", &builtin_float2str, T_FLOAT);
 	def_function(T_STRING, "set2str", &builtin_set2str, T_SET);
 	def_function(T_STRING, "r2str", &builtin_r2str, T_R);
+
+	def_function(T_STRING, "r2tex", &builtin_r2tex, T_R);
 
 	/* set functions */
 	def_function(T_SET, "set_intersection", &builtin_set_new_intersection, T_SET, T_SET);
