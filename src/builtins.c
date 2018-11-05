@@ -3,9 +3,7 @@
 #include <assert.h>
 #include <string.h>
 
-#include <relafix/set.h>
-#include <relafix/relation.h>
-#include <relafix/text_io.h>
+#include <relafix.h>
 
 #include "ast.h"
 #include "memory.h"
@@ -225,7 +223,7 @@ builtin_relation_new_union(Scope *args, MemorySpace *memspace) {
 	};
 	Value *rval = value_new();
 
-	value_set_relation(rval, rf_relation_new_union(arg[0]->as_Relation, arg[1]->as_Relation, NULL));
+	value_set_relation(rval, rf_relation_new_union(arg[0]->as_Relation, arg[1]->as_Relation));
 
 	return rval;
 }
@@ -239,7 +237,7 @@ builtin_relation_new_intersection(Scope *args, MemorySpace *memspace) {
 	};
 	Value *rval = value_new();
 
-	value_set_relation(rval, rf_relation_new_intersection(arg[0]->as_Relation, arg[1]->as_Relation, NULL));
+	value_set_relation(rval, rf_relation_new_intersection(arg[0]->as_Relation, arg[1]->as_Relation));
 
 	return rval;
 }
@@ -253,7 +251,7 @@ builtin_relation_new_concatenation(Scope *args, MemorySpace *memspace) {
 	};
 	Value *rval = value_new();
 
-	value_set_relation(rval, rf_relation_new_concatenation(arg[0]->as_Relation, arg[1]->as_Relation, NULL));
+	value_set_relation(rval, rf_relation_new_concatenation(arg[0]->as_Relation, arg[1]->as_Relation));
 
 	return rval;
 }
@@ -266,7 +264,7 @@ builtin_relation_new_complement(Scope *args, MemorySpace *memspace) {
 	};
 	Value *rval = value_new();
 
-	value_set_relation(rval, rf_relation_new_complement(arg[0]->as_Relation, NULL));
+	value_set_relation(rval, rf_relation_new_complement(arg[0]->as_Relation));
 
 	return rval;
 }
@@ -279,7 +277,7 @@ builtin_relation_new_converse(Scope *args, MemorySpace *memspace) {
 	};
 	Value *rval = value_new();
 
-	value_set_relation(rval, rf_relation_new_converse(arg[0]->as_Relation, NULL));
+	value_set_relation(rval, rf_relation_new_converse(arg[0]->as_Relation));
 
 	return rval;
 }
@@ -435,7 +433,7 @@ builtin_relation_is_lattice(Scope *args, MemorySpace *memspace) {
 	};
 	Value *rval = value_new();
 
-	value_set_bool(rval, rf_relation_is_lattice(arg[0]->as_Relation, NULL));
+	value_set_bool(rval, rf_relation_is_lattice(arg[0]->as_Relation));
 
 	return rval;
 }
@@ -449,7 +447,7 @@ builtin_relation_is_sublattice(Scope *args, MemorySpace *memspace) {
 	};
 	Value *rval = value_new();
 
-	value_set_bool(rval, rf_relation_is_sublattice(arg[0]->as_Relation, arg[1]->as_Relation, NULL));
+	value_set_bool(rval, rf_relation_is_sublattice(arg[0]->as_Relation, arg[1]->as_Relation));
 
 	return rval;
 }

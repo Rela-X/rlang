@@ -3,8 +3,7 @@
 
 #include <stdbool.h>
 
-#include <relafix/set.h>
-#include <relafix/relation.h>
+#include <relafix.h>
 
 #include "types.h"
 
