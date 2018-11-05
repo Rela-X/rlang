@@ -13,7 +13,8 @@ INC     += -I src/
 LIB     += -lm -lrelafix
 
 TREE_WALKER_OBJ = scope_annotator.o symbol_annotator.o type_annotator.o type_validator.o executor.o tree_cleaner.o
-OBJ = main.o ast.o builtins.o rlang.yy.o rlang.tab.o memory.o print.o scope.o symbol.o value.o $(TREE_WALKER_OBJ)
+PARSER_OBJ = rlang.yy.o rlang.tab.o
+OBJ = $(PARSER_OBJ) $(TREE_WALKER_OBJ) main.o ast.o builtins.o memory.o print.o scope.o symbol.o value.o
 
 .PHONY : all clean
 .PHONY : test
@@ -44,6 +45,8 @@ main.o : main.c
 
 $(TREE_WALKER_OBJ) : %.o : %.c
 	$(CC) $(CFLAGS) -c $(INC) -o $@ $<
+
+ast.h print.h : rlang.tab.h
 
 %.tab.c %.tab.h : %.y
 	$(YACC) $(YFLAGS) -b $* $<
