@@ -530,6 +530,22 @@ builtin_relation_is_bijective(Scope *args, MemorySpace *memspace) {
 	return rval;
 }
 
+static
+Value *
+builtin_relation_generate_random(Scope *args, MemorySpace *memspace) {
+	Value *arg[] = {
+		get_value_by_name(args, memspace, "0"),
+		get_value_by_name(args, memspace, "1"),
+		get_value_by_name(args, memspace, "2"),
+	};
+	Value *rval = value_new();
+
+	rf_Relation *r = rf_relation_generate_random(arg[0]->as_Set, arg[1]->as_Set, arg[2]->as_float);
+	value_set_relation(rval, r);
+
+	return rval;
+}
+
 void
 init_builtin_functions(Scope *builtin_scope) {
 	/* basic functions */
@@ -577,4 +593,6 @@ init_builtin_functions(Scope *builtin_scope) {
 	def_function(T_BOOL, "relation_is_surjective", &builtin_relation_is_surjective, T_R);
 	def_function(T_BOOL, "relation_is_injective", &builtin_relation_is_injective, T_R);
 	def_function(T_BOOL, "relation_is_bijective", &builtin_relation_is_bijective, T_R);
+
+	def_function(T_R, "relation_generate_random", &builtin_relation_generate_random, T_SET, T_SET, T_FLOAT);
 }
