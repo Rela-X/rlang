@@ -1,0 +1,2 @@
+/* invalid name: bool */
+int bool := 0;

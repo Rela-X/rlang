@@ -1,0 +1,4 @@
+/* unassigned: r, s */
+int r;
+int s;
+int t := r + s;

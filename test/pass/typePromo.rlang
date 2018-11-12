@@ -1,0 +1,9 @@
+float toFloat(float f) {
+	return f;
+}
+
+println(float2str(1));
+
+int i = 2;
+float f = toFloat(i);
+println(float2str(f));

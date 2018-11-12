@@ -1,0 +1,188 @@
+void ok() {
+	println("ok");
+}
+void fail() {
+	println("FAILED!");
+}
+void test(String name, bool check) {
+	print("[TEST] ");
+	print(name);
+	print(" ... ");
+	if check {
+		ok();
+	} else {
+		fail();
+	}
+}
+
+println("Starting RLang Unittests");
+
+println("");
+println("bool Tests");
+{
+	bool b1 = true;
+	bool b2 = false;
+
+	print("if true ok else fail ... ");
+	if true {
+		ok();
+	} else {
+		fail();
+	}
+
+	print("if false fail else ok ... ");
+	if false {
+		fail();
+	} else {
+		ok();
+	}
+
+	// NOT
+	print("if ! true fail else ok ... ");
+	if !true {
+		fail();
+	} else {
+		ok();
+	}
+
+	print("if ! false ok else fail ... ");
+	if !false {
+		ok();
+	} else {
+		fail();
+	}
+
+	// EQ
+	test("true == true", true == true);
+	test("false == false", false == false);
+
+	// NEQ
+	test("true != false", (true != false));
+
+	// AND
+	test("true && true", (true && true) == true);
+	test("true && false", (true && false) == false);
+	test("false && false", (false && false) == false);
+
+	// OR
+	test("true || true", (true || true) == true);
+	test("true || false", (true || false) == true);
+	test("false || false", (false || false) == false);
+}
+
+println("");
+println("int Tests");
+{
+	test("1 == 1", 1 == 1);
+	test("1 == 2", (1 == 2) == false);
+	test("1 != 1", (1 != 1) == false);
+	test("1 != 2", 1 != 2);
+	test("5 + 7", (5+7) == 12);
+	test("5 - 7", (5-7) == -2);
+	test("5 * 7", (5*7) == 35);
+	test("35 / 7", (35/7) == 5);
+	test("1 < 2", (1 < 2) == true);
+	test("2 < 2", (2 < 2) == false);
+	test("1 <= 2", (1 <= 2) == true);
+	test("2 <= 2", (2 <= 2) == true);
+	test("3 <= 2", (3 <= 2) == false);
+	test("2 > 1", (2 > 1) == true);
+	test("2 >= 2", (2 >= 2) == true);
+	test("2 >= 3", (2 >= 3) == false);
+	test("2 > 1", (2 > 1) == true);
+	test("2 > 2", (2 > 2) == false);
+}
+
+println("");
+println("float Tests");
+{
+	println("skipping ... ");
+}
+
+println("");
+println("Set Tests");
+{
+	Set s1 = {0 1};
+	Set s2 = {0 a 1};
+	Set s3 = {0 a 1};
+	Set s2p = { {} {0} {a} {1} {0 a} {0 1} {a 1} {0 a 1} };
+
+	print("s1 = ");
+	println(set2str(s1));
+	print("s2 = ");
+	println(set2str(s2));
+	print("s3 = ");
+	println(set2str(s3));
+
+	test("s1 == s1", s1 == s1);
+	print("s1 == s2 ... ");
+	if s1 == s2 {
+		fail();
+	} else {
+		ok();
+	}
+	test("s1 != s2", s1 != s2);
+	test("s2 == s3", s2 == s3);
+	test("set_is_subset(s1, s2)", set_is_subset(s1, s2) == true);
+	test("set_is_subset(s2, s1)", set_is_subset(s2, s1) == false);
+	test("set_intersection(s1, s2)", set_intersection(s1, s2) == s1);
+//	test("set_powerset(s2)", set_powerset(s2) == s2p);
+}
+
+println("");
+println("Relation Tests");
+{
+	{
+		Set heyting = { 0 a 1 };
+		R myrel = { 0 a 1 } x heyting :
+			[ 1 0 0 |
+			| 0 1 0 |
+			| 0 0 1 ];
+	}
+	{
+		R r_homogeneous = { a b c d } x { a b c d } :
+			[ 1 0 0 0 |
+			| 0 1 0 0 |
+			| 0 0 1 0 |
+			| 0 0 0 1 ];
+		R r_heterogeneous = { a b c } x { 1 2 3 } :
+			[ 1 0 0 |
+			| 0 1 0 |
+			| 0 0 1 ];
+		println(r2tex(r_homogeneous));
+
+		test("relation_is_homogeneous ... ",
+			relation_is_homogeneous(r_homogeneous) && !relation_is_homogeneous(r_heterogeneous)
+		);
+	}
+	{
+		R r1 = { a b c } x { a b c } :
+			[ 1 0 0 |
+			| 0 1 0 |
+			| 0 0 1 ];
+		R r2 = { a b c } x { a b c } :
+			[ 0 0 1 |
+			| 0 1 0 |
+			| 1 0 0 ];
+		R rx = { a b c } x { a b c } :
+			[ 1 0 1 |
+			| 0 1 0 |
+			| 1 0 1 ];
+		test("relation_union(r1, r2)", relation_union(r1, r2) == rx);
+	}
+	{
+		R rx = { a b c } x { a b c } :
+			[ 1 0 1 |
+			| 0 1 0 |
+			| 1 0 1 ];
+		R rd = { a b c } x { a b c } :
+			[ 0 1 0 |
+			| 1 0 1 |
+			| 0 1 0 ];
+		test("relation_complement(rx)", relation_complement(rx) == rd);
+	}
+	{
+		R r = relation_generate_random({1 2 3}, {1 2 3}, 0.5);
+		println(r2tex(r));
+	}
+}

@@ -1,0 +1,36 @@
+void foo() {
+	int a := 0;
+}
+
+foo();
+
+void bar(int b) {
+	int c := b;
+}
+
+bar(1);
+
+int baz(int d) {
+	int e := d;
+	return e;
+}
+
+int f := baz(2);
+
+int qux(int g, int h) {
+	return g+h;
+}
+
+int i := qux(3,4);
+
+int quux() {
+	return baz(1) + baz(2);
+}
+
+int j := quux();
+
+int k := quuux();
+
+int quuux() {
+	return baz(1) + baz(2);
+}
