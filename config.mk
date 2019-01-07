@@ -1,9 +1,10 @@
-CC      = clang
-CFLAGS  = -std=c11 -Os -Wall -pedantic
-MAKE    = make
-LEX     = flex
-YACC    = bison --yacc
-YFLAGS  = -d -t
+MAKE = make
 
-INC     = -I .
-LIBPATH = -L ../relafix/
+CC       = clang
+CPPFLAGS = -I ./ -I ../relafix/
+CFLAGS   = -std=c11 -Os -Wall -pedantic
+LDFLAGS  = -L ../relafix/
+
+LEX    = flex
+YACC   = bison --yacc
+YFLAGS = -d -t

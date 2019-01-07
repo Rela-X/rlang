@@ -7,10 +7,10 @@ vpath %.y src/
 
 CFLAGS  += -D_POSIX_C_SOURCE=200809L
 
-INC     += -I ./
-INC     += -I src/
+CPPFLAGS     += -I ./
+CPPFLAGS     += -I src/
 
-LIB     += -lm -lrelafix
+LDLIBS  += -lm -lrelafix
 
 TREE_WALKER_OBJ = scope_annotator.o symbol_annotator.o type_annotator.o type_validator.o executor.o tree_cleaner.o
 PARSER_OBJ = rlang.yy.o rlang.tab.o
@@ -27,7 +27,7 @@ TARGET = rlang
 all: $(TARGET)
 
 $(TARGET) : $(OBJ)
-	$(CC) $(CFLAGS) -o $(TARGET) $^ $(LIBPATH) $(LIB)
+	$(CC) $(CFLAGS) -o $(TARGET) $(LDFLAGS) $^ $(LDLIBS)
 
 clean:
 	rm -f $(OBJ) $(TARGET)
@@ -35,16 +35,16 @@ clean:
 	rm -f *.yy.c
 
 main.o : main.c 
-	$(CC) $(CFLAGS) -c $(INC) -o $@ $<
+	$(CC) $(CFLAGS) -c $(CPPFLAGS) -o $@ $<
 
 %.yy.o : %.yy.c
-	$(CC) $(CFLAGS) -c $(INC) -o $@ $<
+	$(CC) $(CFLAGS) -c $(CPPFLAGS) -o $@ $<
 
 %.o : %.c %.h
-	$(CC) $(CFLAGS) -c $(INC) -o $@ $<
+	$(CC) $(CFLAGS) -c $(CPPFLAGS) -o $@ $<
 
 $(TREE_WALKER_OBJ) : %.o : %.c
-	$(CC) $(CFLAGS) -c $(INC) -o $@ $<
+	$(CC) $(CFLAGS) -c $(CPPFLAGS) -o $@ $<
 
 ast.h print.h : rlang.tab.h
 
