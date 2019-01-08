@@ -1,0 +1,7 @@
+#!/bin/sh
+while getopts "L:" OPTNAME
+do
+	case $OPTNAME in
+	L) printf '%s\0' "$OPTARG";;
+	esac
+done | xargs -0 sh -c 'IFS=":"; echo "$*"' arg0

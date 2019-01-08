@@ -56,4 +56,4 @@ ast.h print.h : rlang.tab.h
 
 # test
 test : rlang
-	./test/runtests.sh
+	LD_LIBRARY_PATH="$$(test/get_ld_library_path $(LDFLAGS))" ./rlang < test/unittests.rlang

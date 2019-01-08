@@ -1,0 +1,10 @@
+language: rust
+before_install:
+    - git clone "https://github.com/Rela-X/librelax.git" ../librelax/
+    - git clone "https://github.com/Rela-X/relafix-rs.git" ../relafix/
+    - ( cd ../relafix/ && cargo build --release && ln -s target/release/librelafix.so )
+script:
+    - make && make test
+compiler:
+    - clang
+    - gcc
